@@ -1100,7 +1100,7 @@ function SettingsPanel() {
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold font-heading text-slate-900">Brand & Theme Settings</h2>
-          <p className="text-muted-foreground">Choose a seasonal theme or customize colors manually</p>
+          <p className="text-muted-foreground">Switch between Dark and Light mode for the hero section</p>
         </div>
         <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(formData).length === 0} data-testid="button-save-settings">
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -1109,29 +1109,24 @@ function SettingsPanel() {
       </div>
 
       <div className="mb-8">
-        <h3 className="font-bold text-lg mb-4">Choose a Theme</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h3 className="font-bold text-lg mb-4">Theme Mode</h3>
+        <div className="flex gap-4">
           {themePresets.map((theme) => (
             <button
               key={theme.key}
               onClick={() => applyThemeMutation.mutate(theme.key)}
               disabled={applyThemeMutation.isPending}
-              className={`p-4 rounded-xl border-2 transition-all text-left ${
+              className={`px-8 py-4 rounded-xl border-2 transition-all text-center ${
                 settings?.themeKey === theme.key 
-                  ? "border-primary bg-primary/5" 
+                  ? "border-primary bg-primary/10" 
                   : "border-border hover:border-primary/50"
               }`}
               data-testid={`button-theme-${theme.key}`}
             >
-              <div className="flex gap-1 mb-3">
-                <div className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: theme.colors.primary }} />
-                <div className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: theme.colors.secondary }} />
-                <div className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: theme.colors.accent }} />
-              </div>
-              <div className="font-bold text-sm" style={{ color: theme.colors.text }}>{theme.label}</div>
-              <div className="text-xs text-muted-foreground capitalize">{theme.hero.style} hero</div>
+              <div className={`w-12 h-12 mx-auto rounded-full mb-3 ${theme.key === 'dark' ? 'bg-slate-800' : 'bg-amber-100'}`} />
+              <div className="font-bold text-lg">{theme.label}</div>
               {settings?.themeKey === theme.key && (
-                <div className="text-xs text-primary font-medium mt-1">Current theme</div>
+                <div className="text-xs text-primary font-medium mt-1">Active</div>
               )}
             </button>
           ))}
@@ -1225,7 +1220,7 @@ function SettingsPanel() {
             <Input 
               value={currentSettings.heroBadgeText || ""} 
               onChange={(e) => setFormData({ ...formData, heroBadgeText: e.target.value })}
-              placeholder="Your Gateway to Global Education"
+              placeholder="Travel is a University in Itself"
               data-testid="input-hero-badge"
             />
           </div>
@@ -1245,7 +1240,7 @@ function SettingsPanel() {
             <Textarea 
               value={currentSettings.heroSubtext || ""} 
               onChange={(e) => setFormData({ ...formData, heroSubtext: e.target.value })}
-              placeholder="We guide you through every step..."
+              placeholder="We organize well-planned educational tours worldwide..."
               rows={3}
               data-testid="input-hero-subtext"
             />
@@ -1316,7 +1311,7 @@ function SettingsPanel() {
             <Input 
               value={currentSettings.footerTagline || ""} 
               onChange={(e) => setFormData({ ...formData, footerTagline: e.target.value })}
-              placeholder="Your trusted partner for international education."
+              placeholder="Your trusted partner for educational travel worldwide."
               data-testid="input-footer-tagline"
             />
           </div>
@@ -1326,7 +1321,7 @@ function SettingsPanel() {
             <Textarea 
               value={currentSettings.aboutIntro || ""} 
               onChange={(e) => setFormData({ ...formData, aboutIntro: e.target.value })}
-              placeholder="Edufly Overseas is a premier international education consultancy..."
+              placeholder="Edufly Overseas is a premier educational travel and tour company..."
               rows={4}
               data-testid="input-about-intro"
             />

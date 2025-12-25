@@ -15,7 +15,7 @@ import PlaceDetail from "@/pages/PlaceDetail";
 import Programs from "@/pages/Programs";
 import Gallery from "@/pages/Gallery";
 import Contact from "@/pages/Contact";
-import Counselling from "@/pages/Counselling";
+import BookTour from "@/pages/BookTour";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/Login";
@@ -33,7 +33,7 @@ function Router() {
       <Route path="/programs" component={Programs} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
-      <Route path="/counselling" component={Counselling} />
+      <Route path="/book-tour" component={BookTour} />
       
       {/* Admin Routes */}
       <Route path="/admin/login" component={AdminLogin} />

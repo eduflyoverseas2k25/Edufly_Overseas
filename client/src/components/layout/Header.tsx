@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Plane, GraduationCap, Map, Image as ImageIcon, Phone, BookOpen } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/components/ThemeProvider";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -17,6 +19,8 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,20 +57,27 @@ export function Header() {
             <Link key={item.href} href={item.href}>
               <span className={cn(
                 "cursor-pointer text-sm font-semibold transition-colors hover:text-secondary",
-                location === item.href ? "text-secondary" : (scrolled ? "text-foreground" : "text-white/90")
+                location === item.href 
+                  ? "text-secondary" 
+                  : scrolled 
+                    ? "text-foreground" 
+                    : isDark 
+                      ? "text-primary" 
+                      : "text-slate-700"
               )}>
                 {item.label}
               </span>
             </Link>
           ))}
-          <Link href="/counselling">
+          <ThemeToggle />
+          <Link href="/book-tour">
             <Button 
               className={cn(
                 "rounded-full px-6 font-bold shadow-lg transition-transform hover:scale-105",
                 scrolled ? "bg-primary hover:bg-primary/90 text-white" : "bg-white text-primary hover:bg-white/90"
               )}
             >
-              Book Now
+              Book Tour
             </Button>
           </Link>
         </nav>
@@ -77,9 +88,9 @@ export function Header() {
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? (
-            <X className={cn("w-6 h-6", scrolled ? "text-foreground" : "text-white")} />
+            <X className={cn("w-6 h-6", scrolled ? "text-foreground" : isDark ? "text-primary" : "text-slate-700")} />
           ) : (
-            <Menu className={cn("w-6 h-6", scrolled ? "text-foreground" : "text-white")} />
+            <Menu className={cn("w-6 h-6", scrolled ? "text-foreground" : isDark ? "text-primary" : "text-slate-700")} />
           )}
         </button>
       </div>
@@ -100,9 +111,9 @@ export function Header() {
               </span>
             </Link>
           ))}
-          <Link href="/counselling">
+          <Link href="/book-tour">
             <Button className="w-full rounded-lg bg-primary text-white font-bold" onClick={() => setIsOpen(false)}>
-              Book Consultation Now
+              Book Your Tour
             </Button>
           </Link>
         </div>

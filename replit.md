@@ -2,7 +2,12 @@
 
 ## Overview
 
-Edufly Overseas is a corporate international education consultancy platform designed to help students explore study abroad opportunities. The platform provides information about global study destinations (UK, USA, France, etc.), academic programs across disciplines, and captures leads for counselling services. It features a public-facing website with a premium corporate design and an internal admin dashboard for managing leads and content.
+Edufly Overseas is an educational travel and tour company that collaborates with schools, colleges, and universities to deliver well-planned, outcome-based educational tours worldwide. The platform provides information about 11 global study destinations (Singapore, India, UK, USA, France, Australia, Germany, Canada, Netherlands, Switzerland, China) with comprehensive place information including culture, history, and "special for you" highlights. Company tagline: "Travel is a university in itself."
+
+**Contact Information:**
+- Address: NO 122 G ENAIKARAN STREET, KANCHIPURAM 631502
+- Email: eduflyoverseasindia@gmail.com
+- Phone: 9094550551 / 9842223864
 
 ## User Preferences
 
@@ -41,10 +46,11 @@ client/           # React frontend application
 server/           # Express backend
   routes.ts       # API route definitions
   storage.ts      # Database access layer
-  db.ts           # Database connection
+  db.ts           # Database connection and seed data
 shared/           # Shared code between client/server
   schema.ts       # Drizzle database schema
   routes.ts       # API route type definitions
+  themes.ts       # Theme configuration (Dark/Light)
 ```
 
 ### Key Design Patterns
@@ -53,13 +59,20 @@ shared/           # Shared code between client/server
 - **Storage Abstraction**: `IStorage` interface in `storage.ts` abstracts database operations
 - **Path Aliases**: TypeScript path aliases (`@/`, `@shared/`) configured for clean imports
 
-### Theme System (December 2024)
-- **8 Seasonal Theme Presets**: Summer, Winter, Autumn, Spring, Rainy, Tropical, Sunset, Ocean
+### Theme System (December 2024 - Updated)
+- **2 Theme Modes**: Dark and Light (simplified from 8 seasonal presets)
+- **Default Theme**: Dark mode with slate-gray gradient hero (#1e293b to #475569)
 - **Theme Configuration**: Located in `shared/themes.ts` with typed theme definitions
-- **Each theme includes**: Primary/secondary/accent colors, text color, hero style (light/dark), hero gradient colors
-- **Admin Theme Selection**: Visual theme cards in admin dashboard Settings panel
-- **API Endpoint**: POST `/api/admin/settings/apply-theme` applies preset theme instantly
-- **Dynamic Hero Section**: Home page hero uses CSS gradients from selected theme (heroGradientFrom/Via/To fields)
+- **Admin Theme Selection**: Two large toggle buttons in admin dashboard Settings panel
+- **API Endpoint**: POST `/api/admin/settings/apply-theme` applies theme instantly
+- **Dynamic Hero Section**: Home page hero uses CSS gradients from selected theme
+
+### Destinations (11 Countries - December 2024)
+Each destination has comprehensive place listings with:
+- Description, culture, history, and "Special for you" highlights
+- Singapore (10 places), India (11 places), UK (10 places), USA (10 places)
+- France (8 places), Australia (2 places), Germany (2 places), Canada (2 places)
+- Netherlands (9 places), Switzerland (9 places), China (10 places)
 
 ## External Dependencies
 

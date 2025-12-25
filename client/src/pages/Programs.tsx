@@ -13,9 +13,9 @@ export default function Programs() {
       {/* Header Banner */}
       <section className="pt-32 pb-16 bg-slate-900 text-white">
         <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Our Programs</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Tour Programs</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Comprehensive courses across diverse disciplines.
+            Educational tour packages designed for schools, colleges, and universities.
           </p>
         </div>
       </section>
@@ -37,7 +37,7 @@ export default function Programs() {
                   <h3 className="text-xl font-bold font-heading mb-2 text-primary">{program.category}</h3>
                   <h4 className="text-lg font-semibold mb-4 text-slate-900">{program.title}</h4>
                   <p className="text-muted-foreground leading-relaxed">
-                    {program.description || "Expert-designed curriculum to prepare students for global careers in this field."}
+                    {program.description || "Carefully curated tour experiences with cultural immersion and educational activities."}
                   </p>
                 </div>
               ))}

@@ -11,7 +11,7 @@ export default function About() {
       <section className="pt-32 pb-16 bg-slate-900 text-white">
         <div className="container-custom text-center">
           <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">About Edufly Overseas</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Your trusted partner in international education and career guidance.</p>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Your trusted partner in educational travel and tour experiences worldwide.</p>
         </div>
       </section>
 
@@ -25,17 +25,17 @@ export default function About() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold font-heading mb-6 text-slate-900">
-                Empowering Students Since 2010
+                Creating Memorable Educational Tours Since 2010
               </h2>
               <div className="space-y-4 text-lg text-slate-600 leading-relaxed">
                 <p>
-                  Edufly Overseas is a premier international education consultancy dedicated to helping students achieve their dreams of studying abroad. With over a decade of experience, we have successfully placed thousands of students in top universities across the globe.
+                  Edufly Overseas is a premier educational travel and tour company that collaborates with schools, colleges, and universities to deliver well-planned, outcome-based educational tours worldwide. We believe that "Travel is a university in itself."
                 </p>
                 <p>
-                  Our mission is to provide transparent, accurate, and comprehensive guidance to students and parents. We believe that every student is unique, and we tailor our services to match individual aspirations, academic backgrounds, and financial capabilities.
+                  Our mission is to provide enriching travel experiences that combine learning with adventure. We carefully curate each tour to include cultural immersion, historical exploration, and unique "special for you" experiences that create lasting memories.
                 </p>
                 <p>
-                  From selecting the right course and university to assisting with visa applications and accommodation, we are with you every step of the way. Our team of certified counsellors ensures that you make informed decisions about your future.
+                  From selecting the perfect destinations to arranging accommodations and guided experiences, we handle every detail of your educational tour. Our team of experienced travel coordinators ensures safe, educational, and enjoyable journeys for students of all ages.
                 </p>
               </div>
             </motion.div>
@@ -47,10 +47,9 @@ export default function About() {
               className="relative"
             >
               <div className="absolute inset-0 bg-primary rounded-2xl transform rotate-3 translate-x-4 translate-y-4 -z-10 opacity-20"></div>
-              {/* Unsplash image: team meeting corporate office */}
               <img 
-                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop" 
-                alt="Edufly Team" 
+                src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=1932&auto=format&fit=crop" 
+                alt="Students on Educational Tour" 
                 className="rounded-2xl shadow-xl w-full"
               />
             </motion.div>
@@ -65,13 +64,13 @@ export default function About() {
             <div className="bg-white p-10 rounded-2xl shadow-sm border-t-4 border-primary">
               <h3 className="text-2xl font-bold font-heading mb-4 text-primary">Our Vision</h3>
               <p className="text-slate-600 leading-relaxed">
-                To be the world's most trusted and student-centric international education consultancy, bridging the gap between talent and global opportunities.
+                To be the world's most trusted educational travel company, creating transformative experiences that inspire curiosity and broaden horizons for students everywhere.
               </p>
             </div>
             <div className="bg-white p-10 rounded-2xl shadow-sm border-t-4 border-secondary">
               <h3 className="text-2xl font-bold font-heading mb-4 text-secondary">Our Mission</h3>
               <p className="text-slate-600 leading-relaxed">
-                To empower students with the right knowledge and resources, enabling them to pursue world-class education and build successful global careers.
+                To organize safe, enriching, and memorable educational tours that combine cultural exploration, historical discovery, and hands-on learning experiences across 11 global destinations.
               </p>
             </div>
           </div>

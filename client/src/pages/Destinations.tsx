@@ -9,15 +9,15 @@ export default function Destinations() {
   const { data: destinations, isLoading } = useDestinations();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
       
       {/* Header Banner */}
       <section className="pt-32 pb-16 bg-slate-900 text-white">
         <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Study Destinations</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Tour Destinations</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Explore the world's best countries for international education.
+            Explore the world's best destinations for educational tours.
           </p>
         </div>
       </section>

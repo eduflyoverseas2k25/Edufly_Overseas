@@ -14,7 +14,7 @@ type LeadFormProps = {
   defaultPurpose?: string;
 };
 
-export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadFormProps) {
+export function LeadForm({ className, defaultPurpose = "Educational Tour" }: LeadFormProps) {
   const { mutate: createLead, isPending } = useCreateLead();
 
   const form = useForm<InsertLead>({
@@ -38,8 +38,8 @@ export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadForm
   return (
     <div className={`bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-border/50 ${className}`}>
       <div className="mb-6">
-        <h3 className="text-2xl font-bold font-heading text-foreground">Get Free Counselling</h3>
-        <p className="text-muted-foreground mt-2">Fill out the form below and our expert counsellors will contact you.</p>
+        <h3 className="text-2xl font-bold font-heading text-foreground">Plan Your Educational Tour</h3>
+        <p className="text-muted-foreground mt-2">Fill out the form below and our travel experts will help you plan the perfect tour.</p>
       </div>
 
       <Form {...form}>
@@ -51,7 +51,7 @@ export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadForm
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ram Krish" className="h-12 rounded-xl" {...field} />
+                  <Input placeholder="John Doe" className="h-12 rounded-xl" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -66,7 +66,7 @@ export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadForm
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="krish@example.com" className="h-12 rounded-xl" {...field} />
+                    <Input placeholder="john@example.com" className="h-12 rounded-xl" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,10 +100,10 @@ export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Counselling">General Counselling</SelectItem>
-                    <SelectItem value="University Admission">University Admission</SelectItem>
-                    <SelectItem value="Visa Assistance">Visa Assistance</SelectItem>
-                    <SelectItem value="Language Training">Language Training</SelectItem>
+                    <SelectItem value="Educational Tour">Educational Tour</SelectItem>
+                    <SelectItem value="School Trip">School Trip</SelectItem>
+                    <SelectItem value="College Tour">College / University Tour</SelectItem>
+                    <SelectItem value="Custom Group Tour">Custom Group Tour</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -119,7 +119,7 @@ export function LeadForm({ className, defaultPurpose = "Counselling" }: LeadForm
             {isPending ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</>
             ) : (
-              "Book Free Consultation"
+              "Request Tour Quote"
             )}
           </Button>
         </form>

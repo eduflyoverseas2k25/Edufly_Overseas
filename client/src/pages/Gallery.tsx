@@ -15,7 +15,7 @@ export default function Gallery() {
         <div className="container-custom text-center">
           <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Photo Gallery</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Glimpses of our students, campuses, and global experiences.
+            Glimpses of our tours, destinations, and memorable travel experiences.
           </p>
         </div>
       </section>

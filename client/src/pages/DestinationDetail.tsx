@@ -63,7 +63,7 @@ export default function DestinationDetail() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="container-custom text-center text-white">
             <h1 className="text-5xl md:text-6xl font-bold font-heading mb-4" data-testid="heading-destination-name">
-              Study in {dest.name}
+              Explore {dest.name}
             </h1>
             <div className="flex justify-center gap-4 text-lg flex-wrap">
               {dest.duration && <span className="flex items-center gap-2"><Clock size={18} /> {dest.duration}</span>}

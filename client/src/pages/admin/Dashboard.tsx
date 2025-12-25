@@ -599,7 +599,16 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
   const [editPlace, setEditPlace] = useState<DestinationPlace | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "", imageUrl: "", galleryImages: "" });
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    slug: "",
+    shortDescription: "",
+    description: "", 
+    culture: "",
+    history: "",
+    imageUrl: "", 
+    galleryImages: "" 
+  });
 
   const { data: places, isLoading } = useQuery<DestinationPlace[]>({
     queryKey: ["/api/admin/destinations", selectedDest, "places"],
@@ -616,7 +625,7 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { destinationId: number; name: string; description: string; imageUrl: string; galleryImages: string[] }) => {
+    mutationFn: async (data: { destinationId: number; name: string; slug: string; shortDescription: string; description: string; culture: string; history: string; imageUrl: string; galleryImages: string[] }) => {
       await apiRequest("POST", "/api/admin/places", data);
     },
     onSuccess: () => {
@@ -628,7 +637,7 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: { name: string; description: string; imageUrl: string; galleryImages: string[] } }) => {
+    mutationFn: async ({ id, data }: { id: number; data: { name: string; slug: string; shortDescription: string; description: string; culture: string; history: string; imageUrl: string; galleryImages: string[] } }) => {
       await apiRequest("PUT", `/api/admin/places/${id}`, data);
     },
     onSuccess: () => {
@@ -650,22 +659,38 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
     }
   });
 
-  const resetForm = () => setFormData({ name: "", description: "", imageUrl: "", galleryImages: "" });
+  const resetForm = () => setFormData({ 
+    name: "", 
+    slug: "",
+    shortDescription: "",
+    description: "", 
+    culture: "",
+    history: "",
+    imageUrl: "", 
+    galleryImages: "" 
+  });
 
   const openEdit = (place: DestinationPlace) => {
     setEditPlace(place);
     setFormData({
-      name: place.name, description: place.description || "",
-      imageUrl: place.imageUrl || "", galleryImages: (place.galleryImages || []).join("\n")
+      name: place.name,
+      slug: place.slug || "",
+      shortDescription: place.shortDescription || "",
+      description: place.description || "",
+      culture: place.culture || "",
+      history: place.history || "",
+      imageUrl: place.imageUrl || "",
+      galleryImages: (place.galleryImages || []).join("\n")
     });
   };
 
   const handleSave = () => {
     const galleryImages = formData.galleryImages.split("\n").map(s => s.trim()).filter(Boolean);
+    const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     if (editPlace) {
-      updateMutation.mutate({ id: editPlace.id, data: { ...formData, galleryImages } });
+      updateMutation.mutate({ id: editPlace.id, data: { ...formData, slug, galleryImages } });
     } else if (selectedDest) {
-      createMutation.mutate({ destinationId: selectedDest, ...formData, galleryImages });
+      createMutation.mutate({ destinationId: selectedDest, ...formData, slug, galleryImages });
     }
   };
 
@@ -737,26 +762,44 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
       )}
 
       <Dialog open={isAdding || !!editPlace} onOpenChange={() => { setIsAdding(false); setEditPlace(null); }}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editPlace ? "Edit Place" : "Add Place"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Name</Label>
-              <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} data-testid="input-place-name" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Name *</Label>
+                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} data-testid="input-place-name" placeholder="e.g. Marina Bay Sands" />
+              </div>
+              <div>
+                <Label>Slug (URL-friendly name)</Label>
+                <Input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} data-testid="input-place-slug" placeholder="e.g. marina-bay-sands (auto-generated if empty)" />
+              </div>
             </div>
             <div>
-              <Label>Description</Label>
-              <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} data-testid="input-place-description" />
+              <Label>Short Description</Label>
+              <Input value={formData.shortDescription} onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })} data-testid="input-place-short-desc" placeholder="Brief one-line description for cards" />
             </div>
             <div>
-              <Label>Main Image URL</Label>
-              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-place-image" />
+              <Label>Full Description</Label>
+              <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} data-testid="input-place-description" placeholder="Detailed overview of the place" />
+            </div>
+            <div>
+              <Label>Culture</Label>
+              <Textarea value={formData.culture} onChange={(e) => setFormData({ ...formData, culture: e.target.value })} rows={4} data-testid="input-place-culture" placeholder="Cultural significance, traditions, local customs..." />
+            </div>
+            <div>
+              <Label>History</Label>
+              <Textarea value={formData.history} onChange={(e) => setFormData({ ...formData, history: e.target.value })} rows={4} data-testid="input-place-history" placeholder="Historical background, founding story, key events..." />
+            </div>
+            <div>
+              <Label>Main Image URL *</Label>
+              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-place-image" placeholder="https://images.unsplash.com/..." />
             </div>
             <div>
               <Label>Gallery Images (one URL per line)</Label>
-              <Textarea value={formData.galleryImages} onChange={(e) => setFormData({ ...formData, galleryImages: e.target.value })} rows={4} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" data-testid="input-place-gallery" />
+              <Textarea value={formData.galleryImages} onChange={(e) => setFormData({ ...formData, galleryImages: e.target.value })} rows={3} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" data-testid="input-place-gallery" />
             </div>
           </div>
           <DialogFooter>

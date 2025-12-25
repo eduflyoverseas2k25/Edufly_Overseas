@@ -8,7 +8,7 @@ import { z } from "zod";
 
 type InsertAdmin = z.infer<typeof insertAdminSchema>;
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Admins
@@ -47,6 +47,7 @@ export interface IStorage {
 
   // Destination Places
   getPlacesByDestinationId(destinationId: number): Promise<DestinationPlace[]>;
+  getPlaceBySlug(destinationId: number, slug: string): Promise<DestinationPlace | undefined>;
   createDestinationPlace(place: InsertDestinationPlace): Promise<DestinationPlace>;
   updateDestinationPlace(id: number, place: Partial<InsertDestinationPlace>): Promise<DestinationPlace | undefined>;
   deleteDestinationPlace(id: number): Promise<boolean>;
@@ -172,6 +173,13 @@ export class DatabaseStorage implements IStorage {
   // Destination Places
   async getPlacesByDestinationId(destinationId: number): Promise<DestinationPlace[]> {
     return await db.select().from(destinationPlaces).where(eq(destinationPlaces.destinationId, destinationId));
+  }
+
+  async getPlaceBySlug(destinationId: number, slug: string): Promise<DestinationPlace | undefined> {
+    const [place] = await db.select().from(destinationPlaces).where(
+      and(eq(destinationPlaces.destinationId, destinationId), eq(destinationPlaces.slug, slug))
+    );
+    return place;
   }
 
   async createDestinationPlace(insertPlace: InsertDestinationPlace): Promise<DestinationPlace> {

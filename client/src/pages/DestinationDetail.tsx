@@ -3,10 +3,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useDestination, useDestinationPlaces } from "@/hooks/use-resources";
 import { Link, useRoute } from "wouter";
-import { Loader2, ArrowLeft, Clock, Languages, MapPin, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ArrowLeft, Clock, Languages, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/LeadForm";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { DestinationPlace } from "@shared/schema";
 
 export default function DestinationDetail() {
@@ -17,12 +16,10 @@ export default function DestinationDetail() {
   
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [isCultureExpanded, setIsCultureExpanded] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<DestinationPlace | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -33,7 +30,7 @@ export default function DestinationDetail() {
 
   if (!dest) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           <h2 className="text-2xl font-bold mb-4">Destination Not Found</h2>
@@ -46,40 +43,13 @@ export default function DestinationDetail() {
     );
   }
 
-  const overviewLines = dest.overview?.split('\n') || [];
   const shouldTruncate = dest.overview && dest.overview.length > 300;
   const displayOverview = shouldTruncate && !isOverviewExpanded 
     ? dest.overview.slice(0, 300) + "..." 
     : dest.overview;
 
-  const openPlaceGallery = (place: DestinationPlace) => {
-    setSelectedPlace(place);
-    setCurrentImageIndex(0);
-  };
-
-  const closePlaceGallery = () => {
-    setSelectedPlace(null);
-    setCurrentImageIndex(0);
-  };
-
-  const nextImage = () => {
-    if (selectedPlace?.galleryImages) {
-      setCurrentImageIndex((prev) => 
-        prev < selectedPlace.galleryImages!.length - 1 ? prev + 1 : 0
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (selectedPlace?.galleryImages) {
-      setCurrentImageIndex((prev) => 
-        prev > 0 ? prev - 1 : selectedPlace.galleryImages!.length - 1
-      );
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
       
       {/* Hero */}
@@ -92,10 +62,12 @@ export default function DestinationDetail() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="container-custom text-center text-white">
-            <h1 className="text-5xl md:text-6xl font-bold font-heading mb-4">Study in {dest.name}</h1>
+            <h1 className="text-5xl md:text-6xl font-bold font-heading mb-4" data-testid="heading-destination-name">
+              Study in {dest.name}
+            </h1>
             <div className="flex justify-center gap-4 text-lg flex-wrap">
-              <span className="flex items-center gap-2"><Clock size={18} /> {dest.duration}</span>
-              <span className="flex items-center gap-2"><Languages size={18} /> {dest.language}</span>
+              {dest.duration && <span className="flex items-center gap-2"><Clock size={18} /> {dest.duration}</span>}
+              {dest.language && <span className="flex items-center gap-2"><Languages size={18} /> {dest.language}</span>}
             </div>
           </div>
         </div>
@@ -111,8 +83,8 @@ export default function DestinationDetail() {
           <div className="lg:col-span-2 space-y-12">
             {/* Overview with Read More */}
             <div>
-              <h2 className="text-3xl font-bold font-heading mb-6 text-slate-900" data-testid="heading-overview">Overview</h2>
-              <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-line" data-testid="text-overview">
+              <h2 className="text-3xl font-bold font-heading mb-6" data-testid="heading-overview">Overview</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-overview">
                 {displayOverview}
               </p>
               {shouldTruncate && (
@@ -130,16 +102,15 @@ export default function DestinationDetail() {
             {/* Places to Explore */}
             {places && places.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold font-heading mb-6 text-slate-900 flex items-center gap-2" data-testid="heading-places">
+                <h2 className="text-2xl font-bold font-heading mb-6 flex items-center gap-2" data-testid="heading-places">
                   <MapPin className="text-primary" size={24} />
                   Places to Explore
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {places.map((place: DestinationPlace) => (
                     <div 
                       key={place.id}
-                      className="group cursor-pointer rounded-xl overflow-hidden border border-border hover-elevate"
-                      onClick={() => openPlaceGallery(place)}
+                      className="group rounded-xl overflow-hidden border border-border bg-card"
                       data-testid={`card-place-${place.id}`}
                     >
                       <div className="relative h-48 overflow-hidden">
@@ -153,6 +124,22 @@ export default function DestinationDetail() {
                           <h3 className="text-white font-bold text-lg">{place.name}</h3>
                         </div>
                       </div>
+                      <div className="p-4">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                          {place.shortDescription || place.description}
+                        </p>
+                        {place.slug ? (
+                          <Link href={`/destinations/${slug}/places/${place.slug}`}>
+                            <Button className="w-full" data-testid={`button-explore-${place.id}`}>
+                              Explore
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Button className="w-full" disabled data-testid={`button-explore-${place.id}`}>
+                            Coming Soon
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -162,8 +149,8 @@ export default function DestinationDetail() {
             {/* Life & Culture */}
             {dest.sightseeing && (
               <div>
-                <h2 className="text-2xl font-bold font-heading mb-4 text-slate-900" data-testid="heading-culture">Life & Culture</h2>
-                <p className="text-slate-600 leading-relaxed whitespace-pre-line" data-testid="text-culture">
+                <h2 className="text-2xl font-bold font-heading mb-4" data-testid="heading-culture">Life & Culture</h2>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-culture">
                   {dest.sightseeing.length > 300 && !isCultureExpanded 
                     ? dest.sightseeing.slice(0, 300) + "..." 
                     : dest.sightseeing}
@@ -190,72 +177,6 @@ export default function DestinationDetail() {
           </div>
         </div>
       </div>
-
-      {/* Place Gallery Lightbox */}
-      <Dialog open={!!selectedPlace} onOpenChange={(open) => !open && closePlaceGallery()}>
-        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none [&>button]:text-white [&>button]:hover:bg-white/20">
-          <DialogTitle className="sr-only">{selectedPlace?.name || "Place Gallery"}</DialogTitle>
-          {selectedPlace && (
-            <div className="relative">
-              {/* Image */}
-              <div className="relative aspect-video">
-                <img 
-                  src={selectedPlace.galleryImages?.[currentImageIndex] || selectedPlace.imageUrl}
-                  alt={selectedPlace.name}
-                  className="w-full h-full object-cover rounded-t-lg"
-                  data-testid="img-gallery-current"
-                />
-                
-                {/* Navigation arrows */}
-                {selectedPlace.galleryImages && selectedPlace.galleryImages.length > 1 && (
-                  <>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
-                      onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                      data-testid="button-prev-image"
-                    >
-                      <ChevronLeft size={32} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
-                      onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                      data-testid="button-next-image"
-                    >
-                      <ChevronRight size={32} />
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{selectedPlace.name}</h3>
-                <p className="text-slate-300 leading-relaxed">{selectedPlace.description}</p>
-                
-                {/* Image indicators */}
-                {selectedPlace.galleryImages && selectedPlace.galleryImages.length > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    {selectedPlace.galleryImages.map((_, idx) => (
-                      <button
-                        key={idx}
-                        className={`w-2 h-2 rounded-full transition-colors ${
-                          idx === currentImageIndex ? 'bg-primary' : 'bg-white/40'
-                        }`}
-                        onClick={() => setCurrentImageIndex(idx)}
-                        data-testid={`button-indicator-${idx}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Footer />
     </div>

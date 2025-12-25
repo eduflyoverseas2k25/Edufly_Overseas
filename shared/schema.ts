@@ -69,7 +69,11 @@ export const destinationPlaces = pgTable("destination_places", {
   id: serial("id").primaryKey(),
   destinationId: integer("destination_id").notNull(),
   name: text("name").notNull(),
+  slug: text("slug"),
+  shortDescription: text("short_description"),
   description: text("description"),
+  culture: text("culture"),
+  history: text("history"),
   imageUrl: text("image_url").notNull(),
   galleryImages: text("gallery_images").array(),
 });

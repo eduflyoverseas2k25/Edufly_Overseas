@@ -595,7 +595,10 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
     queryKey: ["/api/admin/destinations", selectedDest, "places"],
     queryFn: async () => {
       if (!selectedDest) return [];
-      const res = await fetch(`/api/admin/destinations/${selectedDest}/places`, { credentials: "include" });
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`/api/admin/destinations/${selectedDest}/places`, { 
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       if (!res.ok) throw new Error("Failed to fetch places");
       return res.json();
     },

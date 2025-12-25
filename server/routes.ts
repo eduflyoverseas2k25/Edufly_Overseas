@@ -4,11 +4,14 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { insertLeadSchema } from "@shared/schema";
-import session from "express-session";
-import MemoryStore from "memorystore";
 import { initializeDatabase } from "./db";
 
-const SessionStore = MemoryStore(session);
+// Simple token storage (in production, use Redis or database)
+const validTokens = new Set<string>();
+
+function generateToken(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
 
 async function seedDatabase() {
   const existingDestinations = await storage.getDestinations();
@@ -459,28 +462,16 @@ export async function registerRoutes(
   
   // Trust proxy for Render deployment
   app.set('trust proxy', 1);
-  
-  // Setup session middleware
-  app.use(session({
-    store: new SessionStore({
-      checkPeriod: 86400000
-    }),
-    secret: process.env.SESSION_SECRET || 'edufly-admin-secret-key-change-in-production',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000
-    }
-  }));
 
-  // Admin auth middleware
+  // Simple token-based auth middleware (no cookies needed!)
   const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-    if ((req.session as any).isAdmin) {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (token && validTokens.has(token)) {
       next();
     } else {
+      console.log(`[Auth] Access denied - token: ${token ? 'provided but invalid' : 'missing'}`);
       res.status(401).json({ message: "Access denied. Please login." });
     }
   };
@@ -552,26 +543,37 @@ export async function registerRoutes(
     const adminPass = (process.env.ADMIN_PASS || "admin").trim();
     
     console.log(`[Auth] Login attempt for user: "${username}"`);
-    console.log(`[Auth] Expected user: "${adminUser}" (from env: ${!!process.env.ADMIN_USER})`);
     
     if (username?.trim() === adminUser && password === adminPass) {
-      (req.session as any).isAdmin = true;
-      console.log(`[Auth] Login successful for: ${username}`);
-      res.json({ token: "session-authenticated", message: "Login successful" });
+      const token = generateToken();
+      validTokens.add(token);
+      console.log(`[Auth] Login successful, token generated`);
+      res.json({ token, message: "Login successful" });
     } else {
-      console.log(`[Auth] Login failed - username match: ${username?.trim() === adminUser}, password match: ${password === adminPass}`);
+      console.log(`[Auth] Login failed`);
       res.status(401).json({ message: "Invalid credentials" });
     }
   });
 
   // Admin Logout
   app.post("/api/admin/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Failed to logout" });
-      }
-      res.json({ message: "Logged out successfully" });
-    });
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    if (token) {
+      validTokens.delete(token);
+    }
+    res.json({ message: "Logged out" });
+  });
+
+  // Admin Check Auth (for frontend to verify token)
+  app.get("/api/admin/check-auth", (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    if (token && validTokens.has(token)) {
+      res.json({ authenticated: true });
+    } else {
+      res.status(401).json({ authenticated: false });
+    }
   });
 
   // Admin Leads (Protected)

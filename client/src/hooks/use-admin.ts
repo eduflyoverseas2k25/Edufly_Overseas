@@ -11,9 +11,26 @@ const loginSchema = z.object({
 
 type LoginData = z.infer<typeof loginSchema>;
 
+// Token management
+export function getAuthToken(): string | null {
+  return localStorage.getItem('admin_token');
+}
+
+export function setAuthToken(token: string): void {
+  localStorage.setItem('admin_token', token);
+}
+
+export function clearAuthToken(): void {
+  localStorage.removeItem('admin_token');
+}
+
+export function getAuthHeaders(): HeadersInit {
+  const token = getAuthToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 export function useAdminLogin() {
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
 
   return useMutation({
     mutationFn: async (data: LoginData) => {
@@ -21,7 +38,6 @@ export function useAdminLogin() {
         method: api.admin.login.method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -30,7 +46,10 @@ export function useAdminLogin() {
       
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.token) {
+        setAuthToken(data.token);
+      }
       toast({
         title: "Welcome back",
         description: "Logged in successfully",
@@ -51,7 +70,9 @@ export function useAdminLeads() {
   return useQuery({
     queryKey: [api.admin.leadsList.path],
     queryFn: async () => {
-      const res = await fetch(api.admin.leadsList.path, { credentials: 'include' });
+      const res = await fetch(api.admin.leadsList.path, { 
+        headers: getAuthHeaders()
+      });
       if (res.status === 401) throw new Error('Unauthorized');
       if (!res.ok) throw new Error('Failed to fetch leads');
       return res.json();
@@ -69,12 +90,13 @@ export function useAdminLogout() {
     mutationFn: async () => {
       const res = await fetch('/api/admin/logout', {
         method: 'POST',
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error('Failed to logout');
       return res.json();
     },
     onSuccess: () => {
+      clearAuthToken();
       queryClient.clear();
       toast({
         title: "Logged out",
@@ -82,5 +104,23 @@ export function useAdminLogout() {
       });
       setLocation('/admin/login');
     }
+  });
+}
+
+export function useCheckAuth() {
+  return useQuery({
+    queryKey: ['admin-auth-check'],
+    queryFn: async () => {
+      const token = getAuthToken();
+      if (!token) return { authenticated: false };
+      
+      const res = await fetch('/api/admin/check-auth', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.status === 401) return { authenticated: false };
+      return res.json();
+    },
+    retry: false,
+    staleTime: 30000,
   });
 }

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: edufly-overseas
+    env: node
+    plan: free
+    buildCommand: npm install && npm run db:push && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: edufly-db
+          property: connectionString
+      - key: NODE_VERSION
+        value: 20.18.3
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  - name: edufly-db
+    plan: free
+    databaseName: edufly
+    user: edufly

@@ -3,6 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertLeadSchema } from "@shared/schema";
+import { getThemeByKey } from "@shared/themes";
 import { initializeDatabase } from "./db";
 import crypto from "crypto";
 
@@ -448,7 +449,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "Theme key is required" });
       }
       
-      const { getThemeByKey } = await import("@shared/themes");
       const theme = getThemeByKey(themeKey);
       
       if (!theme) {

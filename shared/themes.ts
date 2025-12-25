@@ -28,10 +28,11 @@ export const themePresets: ThemePreset[] = [
       text: "#1e293b",
     },
     hero: {
-      style: "light",
-      gradientFrom: "#fff7ed",
-      gradientVia: "#fef3c7",
-      gradientTo: "#ffedd5",
+      style: "dark",
+      gradientFrom: "#1a1a2e",
+      gradientVia: "#16213e",
+      gradientTo: "#0f3460",
+      overlayColor: "rgba(26, 26, 46, 0.85)",
     },
   },
   {

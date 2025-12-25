@@ -87,6 +87,7 @@ export async function initializeDatabase() {
       id SERIAL PRIMARY KEY,
       site_name TEXT DEFAULT 'Edufly Overseas',
       tagline TEXT DEFAULT 'Your Gateway to Global Education',
+      theme_key TEXT DEFAULT 'summer',
       primary_color TEXT DEFAULT '#ef6e2d',
       secondary_color TEXT DEFAULT '#fdc22c',
       accent_color TEXT DEFAULT '#178ab6',
@@ -95,11 +96,28 @@ export async function initializeDatabase() {
       hero_gradient_from TEXT DEFAULT '#ef6e2d',
       hero_gradient_via TEXT DEFAULT '#fdc22c',
       hero_gradient_to TEXT DEFAULT '#178ab6',
+      hero_image_url TEXT,
+      hero_overlay_color TEXT,
       contact_email TEXT DEFAULT 'info@eduflyoverseas.com',
       contact_phone TEXT DEFAULT '+91 12345 67890',
       contact_address TEXT DEFAULT '123 Education Street, Chennai, India',
-      footer_text TEXT DEFAULT 'Edufly Overseas - Your trusted partner for international education'
+      footer_text TEXT DEFAULT 'Edufly Overseas - Your trusted partner for international education',
+      hero_badge_text TEXT DEFAULT 'Your Gateway to Global Education',
+      hero_title TEXT DEFAULT 'Explore the World Through Education',
+      hero_subtitle TEXT DEFAULT 'Join thousands of students who have transformed their futures with our expert guidance and global education programs.'
     );
+    
+    -- Add missing columns if table already exists
+    DO $$ 
+    BEGIN
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS theme_key TEXT DEFAULT 'summer';
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_image_url TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_overlay_color TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_badge_text TEXT DEFAULT 'Your Gateway to Global Education';
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_title TEXT DEFAULT 'Explore the World Through Education';
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_subtitle TEXT DEFAULT 'Join thousands of students who have transformed their futures with our expert guidance and global education programs.';
+    EXCEPTION WHEN others THEN NULL;
+    END $$;
     
     INSERT INTO site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
   `;

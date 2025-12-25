@@ -5,12 +5,39 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { insertLeadSchema } from "@shared/schema";
 import { initializeDatabase } from "./db";
+import crypto from "crypto";
 
-// Simple token storage (in production, use Redis or database)
-const validTokens = new Set<string>();
+// Stateless token system - tokens are signed with SECRET and can be verified without storage
+const TOKEN_SECRET = process.env.SESSION_SECRET || "default-secret-change-me";
+const TOKEN_EXPIRY_HOURS = 24;
 
 function generateToken(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  const payload = {
+    id: crypto.randomBytes(8).toString('hex'),
+    exp: Date.now() + (TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
+  };
+  const data = JSON.stringify(payload);
+  const signature = crypto.createHmac('sha256', TOKEN_SECRET).update(data).digest('hex');
+  return Buffer.from(data).toString('base64') + '.' + signature;
+}
+
+function verifyToken(token: string): boolean {
+  try {
+    const [dataB64, signature] = token.split('.');
+    if (!dataB64 || !signature) return false;
+    
+    const data = Buffer.from(dataB64, 'base64').toString('utf8');
+    const expectedSig = crypto.createHmac('sha256', TOKEN_SECRET).update(data).digest('hex');
+    
+    if (signature !== expectedSig) return false;
+    
+    const payload = JSON.parse(data);
+    if (payload.exp < Date.now()) return false;
+    
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function seedDatabase() {
@@ -463,15 +490,15 @@ export async function registerRoutes(
   // Trust proxy for Render deployment
   app.set('trust proxy', 1);
 
-  // Simple token-based auth middleware (no cookies needed!)
+  // Stateless token-based auth middleware (no cookies, no storage needed!)
   const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.replace('Bearer ', '');
     
-    if (token && validTokens.has(token)) {
+    if (token && verifyToken(token)) {
       next();
     } else {
-      console.log(`[Auth] Access denied - token: ${token ? 'provided but invalid' : 'missing'}`);
+      console.log(`[Auth] Access denied - token: ${token ? 'invalid/expired' : 'missing'}`);
       res.status(401).json({ message: "Access denied. Please login." });
     }
   };
@@ -536,7 +563,7 @@ export async function registerRoutes(
     res.json(gallery);
   });
 
-  // Admin Auth
+  // Admin Auth - stateless signed tokens (survives server restarts!)
   app.post(api.admin.login.path, async (req, res) => {
     const { username, password } = req.body;
     const adminUser = (process.env.ADMIN_USER || "admin").trim();
@@ -546,8 +573,7 @@ export async function registerRoutes(
     
     if (username?.trim() === adminUser && password === adminPass) {
       const token = generateToken();
-      validTokens.add(token);
-      console.log(`[Auth] Login successful, token generated`);
+      console.log(`[Auth] Login successful, signed token generated`);
       res.json({ token, message: "Login successful" });
     } else {
       console.log(`[Auth] Login failed`);
@@ -555,21 +581,16 @@ export async function registerRoutes(
     }
   });
 
-  // Admin Logout
+  // Admin Logout (just clears client-side, token will expire naturally)
   app.post("/api/admin/logout", (req, res) => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.replace('Bearer ', '');
-    if (token) {
-      validTokens.delete(token);
-    }
     res.json({ message: "Logged out" });
   });
 
-  // Admin Check Auth (for frontend to verify token)
+  // Admin Check Auth (verifies token signature and expiry)
   app.get("/api/admin/check-auth", (req, res) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.replace('Bearer ', '');
-    if (token && validTokens.has(token)) {
+    if (token && verifyToken(token)) {
       res.json({ authenticated: true });
     } else {
       res.status(401).json({ authenticated: false });

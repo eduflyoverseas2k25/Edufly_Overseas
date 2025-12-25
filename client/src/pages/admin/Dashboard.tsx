@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, Users, MapPin, GraduationCap, Image, MessageSquare, 
   LogOut, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Loader2, Settings, Palette 
@@ -26,6 +26,15 @@ type Tab = "dashboard" | "leads" | "destinations" | "programs" | "places" | "gal
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  // Check if user has a token, redirect to login if not
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      setLocation('/admin/login');
+    }
+  }, [setLocation]);
 
   const { data: leads, isLoading: leadsLoading, error } = useQuery<Lead[]>({
     queryKey: ["/api/admin/leads"]
@@ -50,20 +59,21 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       await apiRequest("POST", "/api/admin/logout");
-      window.location.href = "/admin/login";
+      localStorage.removeItem('admin_token');
+      setLocation('/admin/login');
     } catch (err) {
-      toast({ title: "Error", description: "Failed to logout", variant: "destructive" });
+      localStorage.removeItem('admin_token');
+      setLocation('/admin/login');
     }
   };
 
-  if (error) {
-    return (
-      <div className="flex h-screen items-center justify-center flex-col gap-4">
-        <p className="text-destructive font-bold">Access Denied. Please login.</p>
-        <Link href="/admin/login"><Button>Go to Login</Button></Link>
-      </div>
-    );
-  }
+  // Redirect to login on auth error
+  useEffect(() => {
+    if (error) {
+      localStorage.removeItem('admin_token');
+      setLocation('/admin/login');
+    }
+  }, [error, setLocation]);
 
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },

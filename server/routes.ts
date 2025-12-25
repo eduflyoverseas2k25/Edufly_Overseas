@@ -6,6 +6,7 @@ import { z } from "zod";
 import { insertLeadSchema } from "@shared/schema";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import { initializeDatabase } from "./db";
 
 const SessionStore = MemoryStore(session);
 
@@ -453,6 +454,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Initialize database tables (creates them if they don't exist)
+  await initializeDatabase();
+  
   // Trust proxy for Render deployment
   app.set('trust proxy', 1);
   

@@ -159,4 +159,4 @@ export function getThemeByKey(key: string): ThemePreset | undefined {
   return themePresets.find((t) => t.key === key);
 }
 
-export const defaultThemeKey = "ocean";
+export const defaultThemeKey = "summer";

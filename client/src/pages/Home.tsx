@@ -26,7 +26,7 @@ export default function Home() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[85vh] lg:h-screen lg:min-h-[600px] flex items-center overflow-hidden py-20 lg:py-0">
         {/* Background - Dynamic based on theme */}
         <div 
           className="absolute inset-0 z-0 transition-all duration-500" 
@@ -44,7 +44,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="container-custom relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-20">
+        <div className="container-custom relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-24 lg:pt-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -58,13 +58,13 @@ export default function Home() {
             <h1 className={`text-5xl md:text-6xl lg:text-7xl font-bold font-heading leading-tight mb-6 ${
               isDark ? "text-white" : "text-slate-900"
             }`}>
-              Start Here. <br/>
-              <span className="text-secondary">Go Anywhere.</span>
+              From Textbooks <br/>
+              <span className="text-secondary">to Take-off.</span>
             </h1>
             <p className={`text-lg md:text-xl mb-8 max-w-lg leading-relaxed ${
               isDark ? "text-slate-200" : "text-slate-600"
             }`}>
-              {settings?.heroSubtext || "We organize well-planned educational tours worldwide for schools, colleges, and universities. Explore culture, history, and unique experiences."}
+              Immersive learning journeys, transforming textbooks into real-world experiences by connecting students with history, culture, and science through hands-on exploration, fostering vital life skills like teamwork, independence, and critical thinking, all while providing unforgettable memories and building global awareness.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/destinations">

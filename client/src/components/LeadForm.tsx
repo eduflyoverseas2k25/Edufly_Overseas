@@ -51,7 +51,7 @@ export function LeadForm({ className, defaultPurpose = "Educational Tour" }: Lea
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ram Krish" className="h-12 rounded-xl" {...field} />
+                  <Input placeholder="John Doe" className="h-12 rounded-xl" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -66,7 +66,7 @@ export function LeadForm({ className, defaultPurpose = "Educational Tour" }: Lea
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="krish@example.com" className="h-12 rounded-xl" {...field} />
+                    <Input placeholder="john@example.com" className="h-12 rounded-xl" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

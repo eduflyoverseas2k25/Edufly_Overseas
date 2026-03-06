@@ -1121,6 +1121,70 @@ function TestimonialsPanel({ testimonials, isLoading }: { testimonials: Testimon
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: "", role: "", content: "", imageUrl: "" });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const allowedTypes = ['image/jpeg', 'image/jpg'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({ title: "Only JPEG/JPG files are allowed", variant: "destructive" });
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) { // 5MB for testimonials
+        toast({ title: "File size must be less than 5MB", variant: "destructive" });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const token = localStorage.getItem('admin_token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/admin/upload/gallery', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setUploading(true);
+      let imageUrl = formData.imageUrl;
+
+      if (selectedFile) {
+        imageUrl = await uploadFile(selectedFile);
+      }
+
+      if (!imageUrl) {
+        toast({ title: "Please upload an image or enter an image URL", variant: "destructive" });
+        return;
+      }
+
+      createMutation.mutate({ ...formData, imageUrl });
+    } catch (error) {
+      toast({ title: "Failed to upload file", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -1131,6 +1195,7 @@ function TestimonialsPanel({ testimonials, isLoading }: { testimonials: Testimon
       toast({ title: "Testimonial created" });
       setIsAdding(false);
       setFormData({ name: "", role: "", content: "", imageUrl: "" });
+      setSelectedFile(null);
     }
   });
 
@@ -1177,7 +1242,7 @@ function TestimonialsPanel({ testimonials, isLoading }: { testimonials: Testimon
         )}
       </div>
 
-      <Dialog open={isAdding} onOpenChange={() => setIsAdding(false)}>
+      <Dialog open={isAdding} onOpenChange={() => { setIsAdding(false); setSelectedFile(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Testimonial</DialogTitle>
@@ -1196,15 +1261,42 @@ function TestimonialsPanel({ testimonials, isLoading }: { testimonials: Testimon
               <Textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={3} data-testid="input-testimonial-content" />
             </div>
             <div>
-              <Label>Image URL</Label>
-              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-testimonial-image" />
+              <Label>Upload Photo (JPEG/JPG only - Max 5MB)</Label>
+              <Input 
+                type="file" 
+                accept=".jpg,.jpeg"
+                onChange={handleFileChange}
+                data-testid="input-testimonial-file"
+                className="cursor-pointer"
+              />
+              {selectedFile && (
+                <p className="text-sm text-green-600 mt-2">✓ Selected: {selectedFile.name}</p>
+              )}
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+            <div>
+              <Label>Image URL (Optional)</Label>
+              <Input 
+                value={formData.imageUrl} 
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} 
+                data-testid="input-testimonial-image"
+                placeholder="https://example.com/photo.jpg"
+                disabled={!!selectedFile}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAdding(false)}>Cancel</Button>
-            <Button onClick={() => createMutation.mutate(formData)} disabled={createMutation.isPending} data-testid="button-save-testimonial">
-              {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Create
+            <Button variant="outline" onClick={() => { setIsAdding(false); setSelectedFile(null); }}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={uploading || createMutation.isPending} data-testid="button-save-testimonial">
+              {(uploading || createMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {uploading ? 'Uploading...' : 'Create'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1277,63 +1369,17 @@ function SettingsPanel() {
     updateMutation.mutate(formData);
   };
 
-  // Password change state
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-
-  const changePasswordMutation = useMutation({
-    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      await apiRequest("POST", "/api/admin/change-password", data);
-    },
-    onSuccess: () => {
-      toast({ title: "Password changed successfully!" });
-      setShowPasswordDialog(false);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    },
-    onError: (error: Error) => {
-      toast({ title: error.message || "Failed to change password", variant: "destructive" });
-    }
-  });
-
-  const handlePasswordChange = () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({ title: "New passwords do not match", variant: "destructive" });
-      return;
-    }
-    if (passwordData.newPassword.length < 8) {
-      toast({ title: "Password must be at least 8 characters long", variant: "destructive" });
-      return;
-    }
-    changePasswordMutation.mutate({
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
-    });
-  };
-
   return (
     <>
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold font-heading text-slate-900">Admin Settings</h2>
-          <p className="text-muted-foreground">Manage your account, theme, and site settings</p>
+          <h2 className="text-2xl font-bold font-heading text-slate-900">Brand & Theme Settings</h2>
+          <p className="text-muted-foreground">Switch between Dark and Light mode for the hero section</p>
         </div>
         <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(formData).length === 0} data-testid="button-save-settings">
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
-      </div>
-
-      {/* Change Password Section */}
-      <div className="mb-8 bg-white p-6 rounded-xl border border-border shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-lg">Account Security</h3>
-            <p className="text-sm text-muted-foreground mt-1">Change your admin password</p>
-          </div>
-          <Button onClick={() => setShowPasswordDialog(true)} variant="outline" data-testid="button-change-password">
-            Change Password
-          </Button>
-        </div>
       </div>
 
       <div className="mb-8">
@@ -1557,64 +1603,127 @@ function SettingsPanel() {
         </div>
       </div>
 
+      {/* Social Media Links */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h3 className="font-bold text-lg border-b pb-4 mb-6">Social Media Links</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label>Facebook URL</Label>
+            <Input 
+              value={currentSettings.socialFacebook || ""} 
+              onChange={(e) => setFormData({ ...formData, socialFacebook: e.target.value })}
+              placeholder="https://facebook.com/yourpage"
+              data-testid="input-social-facebook"
+            />
+          </div>
+          <div>
+            <Label>Instagram URL</Label>
+            <Input 
+              value={currentSettings.socialInstagram || ""} 
+              onChange={(e) => setFormData({ ...formData, socialInstagram: e.target.value })}
+              placeholder="https://instagram.com/yourprofile"
+              data-testid="input-social-instagram"
+            />
+          </div>
+          <div>
+            <Label>LinkedIn URL</Label>
+            <Input 
+              value={currentSettings.socialLinkedin || ""} 
+              onChange={(e) => setFormData({ ...formData, socialLinkedin: e.target.value })}
+              placeholder="https://linkedin.com/company/yourcompany"
+              data-testid="input-social-linkedin"
+            />
+          </div>
+          <div>
+            <Label>Twitter URL</Label>
+            <Input 
+              value={currentSettings.socialTwitter || ""} 
+              onChange={(e) => setFormData({ ...formData, socialTwitter: e.target.value })}
+              placeholder="https://twitter.com/yourhandle"
+              data-testid="input-social-twitter"
+            />
+          </div>
+          <div>
+            <Label>YouTube URL</Label>
+            <Input 
+              value={currentSettings.socialYoutube || ""} 
+              onChange={(e) => setFormData({ ...formData, socialYoutube: e.target.value })}
+              placeholder="https://youtube.com/yourchannel"
+              data-testid="input-social-youtube"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* About Page Content */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h3 className="font-bold text-lg border-b pb-4 mb-6">About Page Content</h3>
+        <div className="space-y-4">
+          <div>
+            <Label>Mission Statement</Label>
+            <Textarea 
+              value={currentSettings.aboutMission || ""} 
+              onChange={(e) => setFormData({ ...formData, aboutMission: e.target.value })}
+              placeholder="Our mission is to..."
+              rows={3}
+              data-testid="input-about-mission"
+            />
+          </div>
+          <div>
+            <Label>Vision Statement</Label>
+            <Textarea 
+              value={currentSettings.aboutVision || ""} 
+              onChange={(e) => setFormData({ ...formData, aboutVision: e.target.value })}
+              placeholder="Our vision is to..."
+              rows={3}
+              data-testid="input-about-vision"
+            />
+          </div>
+          <div>
+            <Label>Core Values</Label>
+            <Textarea 
+              value={currentSettings.aboutValues || ""} 
+              onChange={(e) => setFormData({ ...formData, aboutValues: e.target.value })}
+              placeholder="Our core values include..."
+              rows={4}
+              data-testid="input-about-values"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Home Page Content */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h3 className="font-bold text-lg border-b pb-4 mb-6">Home Page Content</h3>
+        <div className="space-y-4">
+          <div>
+            <Label>Features Section Title</Label>
+            <Input 
+              value={currentSettings.homeFeaturesTitle || ""} 
+              onChange={(e) => setFormData({ ...formData, homeFeaturesTitle: e.target.value })}
+              placeholder="Why Choose Edufly Overseas"
+              data-testid="input-home-features-title"
+            />
+          </div>
+          <div>
+            <Label>Features Section Subtitle</Label>
+            <Textarea 
+              value={currentSettings.homeFeaturesSubtitle || ""} 
+              onChange={(e) => setFormData({ ...formData, homeFeaturesSubtitle: e.target.value })}
+              placeholder="Experience the difference with our comprehensive educational travel services"
+              rows={2}
+              data-testid="input-home-features-subtitle"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-800">
           <strong>Note:</strong> After saving changes, the website will automatically update with the new theme colors and content. 
           You may need to refresh the page to see the changes.
         </p>
       </div>
-
-      {/* Change Password Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Current Password</Label>
-              <Input 
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                data-testid="input-current-password"
-                placeholder="Enter current password"
-              />
-            </div>
-            <div>
-              <Label>New Password</Label>
-              <Input 
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                data-testid="input-new-password"
-                placeholder="Enter new password (min 8 characters)"
-              />
-            </div>
-            <div>
-              <Label>Confirm New Password</Label>
-              <Input 
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                data-testid="input-confirm-password"
-                placeholder="Confirm new password"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>Cancel</Button>
-            <Button 
-              onClick={handlePasswordChange}
-              disabled={changePasswordMutation.isPending}
-              data-testid="button-save-password"
-            >
-              {changePasswordMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Change Password
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

@@ -114,7 +114,17 @@ export async function initializeDatabase() {
       contact_email TEXT DEFAULT 'eduflyoverseasindia@gmail.com',
       contact_address TEXT DEFAULT 'NO 122 G ENAIKARAN STREET, KANCHIPURAM 631502',
       footer_tagline TEXT DEFAULT 'Your trusted partner for educational travel and study tours.',
-      about_intro TEXT DEFAULT 'Travel is a university in itself. We at Edufly Overseas collaborate with schools, colleges and universities to deliver well planned and outcome based educational tours. Our expertise in planning and executing safe, educational and fun-filled tours have made us a trusted name in the industry.'
+      about_intro TEXT DEFAULT 'Travel is a university in itself. We at Edufly Overseas collaborate with schools, colleges and universities to deliver well planned and outcome based educational tours. Our expertise in planning and executing safe, educational and fun-filled tours have made us a trusted name in the industry.',
+      social_facebook TEXT,
+      social_instagram TEXT,
+      social_linkedin TEXT,
+      social_twitter TEXT,
+      social_youtube TEXT,
+      about_mission TEXT,
+      about_vision TEXT,
+      about_values TEXT,
+      home_features_title TEXT DEFAULT 'Why Choose Edufly Overseas',
+      home_features_subtitle TEXT DEFAULT 'Experience the difference with our comprehensive educational travel services'
     );
     
     -- Add missing columns for destination_places
@@ -125,6 +135,22 @@ export async function initializeDatabase() {
       ALTER TABLE destination_places ADD COLUMN IF NOT EXISTS culture TEXT;
       ALTER TABLE destination_places ADD COLUMN IF NOT EXISTS history TEXT;
       ALTER TABLE destination_places ADD COLUMN IF NOT EXISTS gallery_images TEXT[];
+    EXCEPTION WHEN others THEN NULL;
+    END $$;
+    
+    -- Add new columns to site_settings if they don't exist
+    DO $$
+    BEGIN
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS social_facebook TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS social_instagram TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS social_linkedin TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS social_twitter TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS social_youtube TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_mission TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_vision TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_values TEXT;
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS home_features_title TEXT DEFAULT 'Why Choose Edufly Overseas';
+      ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS home_features_subtitle TEXT DEFAULT 'Experience the difference with our comprehensive educational travel services';
     EXCEPTION WHEN others THEN NULL;
     END $$;
     

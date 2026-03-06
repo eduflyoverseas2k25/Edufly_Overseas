@@ -108,6 +108,18 @@ export const siteSettings = pgTable("site_settings", {
   footerTagline: text("footer_tagline").default("Your trusted partner for international education."),
   // About
   aboutIntro: text("about_intro").default("Edufly Overseas is a premier international education consultancy dedicated to helping students achieve their dreams of studying abroad."),
+  aboutMission: text("about_mission"),
+  aboutVision: text("about_vision"),
+  aboutValues: text("about_values"),
+  // Social Media
+  socialFacebook: text("social_facebook"),
+  socialInstagram: text("social_instagram"),
+  socialLinkedin: text("social_linkedin"),
+  socialTwitter: text("social_twitter"),
+  socialYoutube: text("social_youtube"),
+  // Home Page
+  homeFeaturesTitle: text("home_features_title").default("Why Choose Edufly Overseas"),
+  homeFeaturesSubtitle: text("home_features_subtitle").default("Experience the difference with our comprehensive educational travel services"),
 });
 
 // Schemas

@@ -276,10 +276,77 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
   const [editDest, setEditDest] = useState<Destination | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "", slug: "", overview: "", duration: "", language: "",
     studentExposure: "", academicVisits: "", industryExposure: "", sightseeing: "", imageUrl: ""
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({ title: "Only PNG, JPEG, and JPG files are allowed", variant: "destructive" });
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: "File size must be less than 10MB", variant: "destructive" });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const token = localStorage.getItem('admin_token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/admin/upload/destination', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setUploading(true);
+      let imageUrl = formData.imageUrl;
+
+      if (selectedFile) {
+        imageUrl = await uploadFile(selectedFile);
+      }
+
+      const finalData = { ...formData, imageUrl };
+
+      if (editDest) {
+        await updateMutation.mutateAsync({ id: editDest.id, data: finalData });
+      } else {
+        await createMutation.mutateAsync(finalData);
+      }
+      
+      setSelectedFile(null);
+    } catch (error) {
+      toast({ title: "Failed to save destination", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -316,7 +383,10 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
     }
   });
 
-  const resetForm = () => setFormData({ name: "", slug: "", overview: "", duration: "", language: "", studentExposure: "", academicVisits: "", industryExposure: "", sightseeing: "", imageUrl: "" });
+  const resetForm = () => {
+    setFormData({ name: "", slug: "", overview: "", duration: "", language: "", studentExposure: "", academicVisits: "", industryExposure: "", sightseeing: "", imageUrl: "" });
+    setSelectedFile(null);
+  };
 
   const openEdit = (dest: Destination) => {
     setEditDest(dest);
@@ -327,6 +397,7 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
       industryExposure: dest.industryExposure || "", sightseeing: dest.sightseeing || "",
       imageUrl: dest.imageUrl || ""
     });
+    setSelectedFile(null);
   };
 
   return (
@@ -377,7 +448,7 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
         </div>
       </div>
 
-      <Dialog open={isAdding || !!editDest} onOpenChange={() => { setIsAdding(false); setEditDest(null); }}>
+      <Dialog open={isAdding || !!editDest} onOpenChange={() => { setIsAdding(false); setEditDest(null); resetForm(); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editDest ? "Edit Destination" : "Add Destination"}</DialogTitle>
@@ -400,8 +471,27 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
               <Input value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} data-testid="input-dest-language" />
             </div>
             <div className="col-span-2">
-              <Label>Image URL</Label>
-              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-dest-image" />
+              <Label>Upload Image (PNG, JPEG, JPG - Max 10MB)</Label>
+              <Input 
+                type="file" 
+                accept=".png,.jpg,.jpeg"
+                onChange={handleFileChange}
+                data-testid="input-dest-file"
+                className="cursor-pointer"
+              />
+              {selectedFile && (
+                <p className="text-sm text-green-600 mt-2">✓ Selected: {selectedFile.name}</p>
+              )}
+            </div>
+            <div className="col-span-2">
+              <Label>Or Image URL</Label>
+              <Input 
+                value={formData.imageUrl} 
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} 
+                data-testid="input-dest-image"
+                placeholder="https://example.com/image.jpg"
+                disabled={!!selectedFile}
+              />
             </div>
             <div className="col-span-2">
               <Label>Overview</Label>
@@ -413,14 +503,14 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsAdding(false); setEditDest(null); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setIsAdding(false); setEditDest(null); resetForm(); }}>Cancel</Button>
             <Button 
-              onClick={() => editDest ? updateMutation.mutate({ id: editDest.id, data: formData }) : createMutation.mutate(formData)}
-              disabled={createMutation.isPending || updateMutation.isPending}
+              onClick={handleSubmit}
+              disabled={uploading || createMutation.isPending || updateMutation.isPending}
               data-testid="button-save-destination"
             >
-              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {editDest ? "Update" : "Create"}
+              {(uploading || createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {uploading ? 'Uploading...' : (editDest ? "Update" : "Create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -837,6 +927,48 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ title: "", imageUrl: "", category: "" });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({ title: "Only PNG, JPEG, JPG, and PDF files are allowed", variant: "destructive" });
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        toast({ title: "File size must be less than 10MB", variant: "destructive" });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const token = localStorage.getItem('admin_token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/admin/upload/gallery', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -847,8 +979,31 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
       toast({ title: "Gallery item created" });
       setIsAdding(false);
       setFormData({ title: "", imageUrl: "", category: "" });
+      setSelectedFile(null);
     }
   });
+
+  const handleSubmit = async () => {
+    try {
+      setUploading(true);
+      let imageUrl = formData.imageUrl;
+
+      if (selectedFile) {
+        imageUrl = await uploadFile(selectedFile);
+      }
+
+      if (!imageUrl) {
+        toast({ title: "Please upload a file or enter an image URL", variant: "destructive" });
+        return;
+      }
+
+      createMutation.mutate({ ...formData, imageUrl });
+    } catch (error) {
+      toast({ title: "Failed to upload file", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -889,7 +1044,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
         )}
       </div>
 
-      <Dialog open={isAdding} onOpenChange={() => setIsAdding(false)}>
+      <Dialog open={isAdding} onOpenChange={() => { setIsAdding(false); setSelectedFile(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Gallery Image</DialogTitle>
@@ -900,19 +1055,46 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
               <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} data-testid="input-gallery-title" />
             </div>
             <div>
-              <Label>Image URL</Label>
-              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-gallery-url" />
+              <Label>Upload File (PNG, JPEG, JPG, PDF - Max 10MB)</Label>
+              <Input 
+                type="file" 
+                accept=".png,.jpg,.jpeg,.pdf"
+                onChange={handleFileChange}
+                data-testid="input-gallery-file"
+                className="cursor-pointer"
+              />
+              {selectedFile && (
+                <p className="text-sm text-green-600 mt-2">✓ Selected: {selectedFile.name}</p>
+              )}
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or</span>
+              </div>
             </div>
             <div>
-              <Label>Category</Label>
+              <Label>Image URL (Optional)</Label>
+              <Input 
+                value={formData.imageUrl} 
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} 
+                data-testid="input-gallery-url"
+                placeholder="https://example.com/image.jpg"
+                disabled={!!selectedFile}
+              />
+            </div>
+            <div>
+              <Label>Category (Optional)</Label>
               <Input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} data-testid="input-gallery-category" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAdding(false)}>Cancel</Button>
-            <Button onClick={() => createMutation.mutate(formData)} disabled={createMutation.isPending} data-testid="button-save-gallery">
-              {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Create
+            <Button variant="outline" onClick={() => { setIsAdding(false); setSelectedFile(null); }}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={uploading || createMutation.isPending} data-testid="button-save-gallery">
+              {(uploading || createMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {uploading ? 'Uploading...' : 'Create'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1095,17 +1277,63 @@ function SettingsPanel() {
     updateMutation.mutate(formData);
   };
 
+  // Password change state
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      await apiRequest("POST", "/api/admin/change-password", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Password changed successfully!" });
+      setShowPasswordDialog(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message || "Failed to change password", variant: "destructive" });
+    }
+  });
+
+  const handlePasswordChange = () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({ title: "New passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (passwordData.newPassword.length < 8) {
+      toast({ title: "Password must be at least 8 characters long", variant: "destructive" });
+      return;
+    }
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword
+    });
+  };
+
   return (
     <>
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold font-heading text-slate-900">Brand & Theme Settings</h2>
-          <p className="text-muted-foreground">Switch between Dark and Light mode for the hero section</p>
+          <h2 className="text-2xl font-bold font-heading text-slate-900">Admin Settings</h2>
+          <p className="text-muted-foreground">Manage your account, theme, and site settings</p>
         </div>
         <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(formData).length === 0} data-testid="button-save-settings">
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
+      </div>
+
+      {/* Change Password Section */}
+      <div className="mb-8 bg-white p-6 rounded-xl border border-border shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-lg">Account Security</h3>
+            <p className="text-sm text-muted-foreground mt-1">Change your admin password</p>
+          </div>
+          <Button onClick={() => setShowPasswordDialog(true)} variant="outline" data-testid="button-change-password">
+            Change Password
+          </Button>
+        </div>
       </div>
 
       <div className="mb-8">
@@ -1335,6 +1563,58 @@ function SettingsPanel() {
           You may need to refresh the page to see the changes.
         </p>
       </div>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Current Password</Label>
+              <Input 
+                type="password"
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                data-testid="input-current-password"
+                placeholder="Enter current password"
+              />
+            </div>
+            <div>
+              <Label>New Password</Label>
+              <Input 
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                data-testid="input-new-password"
+                placeholder="Enter new password (min 8 characters)"
+              />
+            </div>
+            <div>
+              <Label>Confirm New Password</Label>
+              <Input 
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                data-testid="input-confirm-password"
+                placeholder="Confirm new password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>Cancel</Button>
+            <Button 
+              onClick={handlePasswordChange}
+              disabled={changePasswordMutation.isPending}
+              data-testid="button-save-password"
+            >
+              {changePasswordMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Change Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

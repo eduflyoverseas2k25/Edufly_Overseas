@@ -4,40 +4,9 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { insertLeadSchema } from "@shared/schema";
 import { getThemeByKey } from "@shared/themes";
-import { initializeDatabase } from "./db";
-import crypto from "crypto";
-
-const TOKEN_SECRET = process.env.SESSION_SECRET || "default-secret-change-me";
-const TOKEN_EXPIRY_HOURS = 24;
-
-function generateToken(): string {
-  const payload = {
-    id: crypto.randomBytes(8).toString('hex'),
-    exp: Date.now() + (TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
-  };
-  const data = JSON.stringify(payload);
-  const signature = crypto.createHmac('sha256', TOKEN_SECRET).update(data).digest('hex');
-  return Buffer.from(data).toString('base64') + '.' + signature;
-}
-
-function verifyToken(token: string): boolean {
-  try {
-    const [dataB64, signature] = token.split('.');
-    if (!dataB64 || !signature) return false;
-    
-    const data = Buffer.from(dataB64, 'base64').toString('utf8');
-    const expectedSig = crypto.createHmac('sha256', TOKEN_SECRET).update(data).digest('hex');
-    
-    if (signature !== expectedSig) return false;
-    
-    const payload = JSON.parse(data);
-    if (payload.exp < Date.now()) return false;
-    
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { initializeDatabase, pool } from "./db";
+import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
+import { upload, deleteFile } from "./upload";
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   await initializeDatabase();
@@ -171,13 +140,35 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ===== ADMIN AUTH =====
 
+  // Initialize admin user with hashed password if not exists
+  const initAdmin = async () => {
+    try {
+      const result = await pool.query('SELECT * FROM admins WHERE username = $1', ['admin']);
+      if (result.rows.length === 0) {
+        const hashedPassword = await hashPassword(process.env.ADMIN_PASS || 'Varshaa@1999');
+        await pool.query('INSERT INTO admins (username, password) VALUES ($1, $2)', ['admin', hashedPassword]);
+        console.log('Admin user created with hashed password');
+      }
+    } catch (err) {
+      console.error('Error initializing admin:', err);
+    }
+  };
+  await initAdmin();
+
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      const adminUser = process.env.ADMIN_USER || "admin";
-      const adminPass = process.env.ADMIN_PASS || "admin";
+      
+      // Get admin from database
+      const result = await pool.query('SELECT * FROM admins WHERE username = $1', [username]);
+      if (result.rows.length === 0) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
 
-      if (username === adminUser && password === adminPass) {
+      const admin = result.rows[0];
+      const isValid = await verifyPassword(password, admin.password);
+
+      if (isValid) {
         const token = generateToken();
         return res.json({ success: true, token });
       }
@@ -191,6 +182,83 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.get("/api/admin/verify", requireAdmin, (req, res) => {
     res.json({ valid: true });
+  });
+
+  // Change Password
+  app.post("/api/admin/change-password", requireAdmin, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new passwords are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      }
+
+      // Get current admin password (assuming username is 'admin')
+      const result = await pool.query('SELECT * FROM admins WHERE username = $1', ['admin']);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+
+      const admin = result.rows[0];
+      const isValid = await verifyPassword(currentPassword, admin.password);
+
+      if (!isValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password and update
+      const hashedNewPassword = await hashPassword(newPassword);
+      await pool.query('UPDATE admins SET password = $1 WHERE username = $2', [hashedNewPassword, 'admin']);
+
+      res.json({ message: "Password changed successfully" });
+    } catch (err) {
+      console.error("Change password error:", err);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // ===== FILE UPLOAD ROUTES =====
+
+  // Upload gallery image
+  app.post("/api/admin/upload/gallery", requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileUrl = `/uploads/gallery/${req.file.filename}`;
+      res.json({ 
+        message: "File uploaded successfully", 
+        url: fileUrl,
+        filename: req.file.filename 
+      });
+    } catch (err) {
+      console.error("Upload error:", err);
+      res.status(500).json({ message: "Failed to upload file" });
+    }
+  });
+
+  // Upload destination image
+  app.post("/api/admin/upload/destination", requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileUrl = `/uploads/destinations/${req.file.filename}`;
+      res.json({ 
+        message: "File uploaded successfully", 
+        url: fileUrl,
+        filename: req.file.filename 
+      });
+    } catch (err) {
+      console.error("Upload error:", err);
+      res.status(500).json({ message: "Failed to upload file" });
+    }
   });
 
   // ===== ADMIN ROUTES (Protected) =====

@@ -90,12 +90,14 @@ export default function Dashboard() {
     <div className="min-h-screen bg-slate-50 flex">
       <aside className="w-64 bg-white border-r border-border hidden md:flex flex-col">
         <div className="p-6 border-b border-border flex justify-center">
-          <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">E</span>
-              </div>
-              <span className="text-xl font-bold text-primary font-heading">Edufly Admin</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/assets/logo.png" 
+              alt="Edufly Admin" 
+              className="w-10 h-10 object-cover rounded-full shadow-lg ring-2 ring-primary/20"
+            />
+            <span className="text-xl font-bold text-primary font-heading">Edufly Admin</span>
+          </div>
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {tabs.map((tab) => (

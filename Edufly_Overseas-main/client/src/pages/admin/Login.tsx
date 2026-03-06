@@ -32,12 +32,11 @@ export default function AdminLogin() {
       <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
         <div className="flex flex-col items-center mb-8">
           <div className="mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
-              </div>
-              <span className="text-2xl font-bold text-primary font-heading">Edufly Overseas</span>
-            </div>
+            <img 
+              src="/assets/logo.png" 
+              alt="Edufly Overseas" 
+              className="w-20 h-20 object-cover rounded-full shadow-xl ring-4 ring-primary/20"
+            />
           </div>
           <h1 className="text-2xl font-bold font-heading mt-4">Admin Login</h1>
           <p className="text-muted-foreground">Edufly Overseas Dashboard</p>

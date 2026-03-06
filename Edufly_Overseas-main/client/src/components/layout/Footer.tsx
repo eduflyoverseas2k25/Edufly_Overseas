@@ -8,8 +8,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <div className="mb-6 bg-white/90 p-3 rounded-xl inline-block">
-              <img src="/assets/logo.png" alt="Edufly Overseas" className="h-16 w-auto object-contain" />
+            <div className="mb-6 inline-block">
+              <img 
+                src="/assets/logo.png" 
+                alt="Edufly Overseas" 
+                className="h-16 w-16 object-cover rounded-full shadow-xl ring-4 ring-white/20" 
+              />
             </div>
             <p className="text-slate-400 mb-6 leading-relaxed">
               Creating memorable educational tours worldwide for schools, colleges, and universities. Travel is a university in itself.

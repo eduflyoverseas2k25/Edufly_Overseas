@@ -39,14 +39,11 @@ export function Header() {
     >
       <div className="container-custom flex items-center justify-between">
         <Link href="/">
-          <div className={cn(
-            "flex items-center gap-2 cursor-pointer transition-all duration-300 rounded-xl p-1.5",
-            !scrolled && "bg-white shadow-lg"
-          )}>
+          <div className="flex items-center gap-2 cursor-pointer">
             <img 
               src="/assets/logo.png" 
               alt="Edufly Overseas" 
-              className="h-10 w-auto object-contain"
+              className="h-12 w-12 object-cover rounded-full shadow-lg ring-2 ring-white"
             />
           </div>
         </Link>

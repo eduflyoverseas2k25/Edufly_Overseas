@@ -6,7 +6,8 @@ import { insertLeadSchema } from "@shared/schema";
 import { getThemeByKey } from "@shared/themes";
 import { initializeDatabase, pool } from "./db";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
-import { upload, uploadVideo, deleteFile } from "./upload";
+import { upload, uploadVideo } from "./upload";
+import { uploadToS3, validateFileType, validateFileSize } from "./s3";
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   await initializeDatabase();
@@ -221,7 +222,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ===== FILE UPLOAD ROUTES =====
+  // ===== FILE UPLOAD ROUTES (AWS S3) =====
 
   // Upload gallery image
   app.post("/api/admin/upload/gallery", requireAdmin, upload.single('file'), async (req, res) => {
@@ -230,11 +231,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileUrl = `/uploads/gallery/${req.file.filename}`;
+      // Validate file type and size
+      if (!validateFileType(req.file, 'image')) {
+        return res.status(400).json({ message: "Only PNG, JPEG, and JPG files are allowed" });
+      }
+      if (!validateFileSize(req.file, 10)) {
+        return res.status(400).json({ message: "File size must be less than 10MB" });
+      }
+
+      // Upload to S3
+      const fileUrl = await uploadToS3(req.file, 'gallery/images');
+      
       res.json({ 
         message: "File uploaded successfully", 
         url: fileUrl,
-        filename: req.file.filename 
+        filename: req.file.originalname 
       });
     } catch (err) {
       console.error("Upload error:", err);
@@ -249,11 +260,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileUrl = `/uploads/destinations/${req.file.filename}`;
+      // Validate file type and size
+      if (!validateFileType(req.file, 'image')) {
+        return res.status(400).json({ message: "Only PNG, JPEG, and JPG files are allowed" });
+      }
+      if (!validateFileSize(req.file, 10)) {
+        return res.status(400).json({ message: "File size must be less than 10MB" });
+      }
+
+      // Upload to S3
+      const fileUrl = await uploadToS3(req.file, 'destinations');
+      
       res.json({ 
         message: "File uploaded successfully", 
         url: fileUrl,
-        filename: req.file.filename 
+        filename: req.file.originalname 
       });
     } catch (err) {
       console.error("Upload error:", err);
@@ -268,11 +289,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileUrl = `/uploads/videos/${req.file.filename}`;
+      // Validate file type and size
+      if (!validateFileType(req.file, 'video')) {
+        return res.status(400).json({ message: "Only MP4, MOV, and WEBM files are allowed" });
+      }
+      if (!validateFileSize(req.file, 50)) {
+        return res.status(400).json({ message: "File size must be less than 50MB" });
+      }
+
+      // Upload to S3
+      const fileUrl = await uploadToS3(req.file, 'gallery/videos');
+      
       res.json({ 
         message: "Video uploaded successfully", 
         url: fileUrl,
-        filename: req.file.filename,
+        filename: req.file.originalname,
         mediaType: 'video'
       });
     } catch (err) {

@@ -31,24 +31,43 @@ export default function Gallery() {
             <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
               {gallery?.map((item) => (
                 <div key={item.id} className="break-inside-avoid rounded-xl overflow-hidden group relative">
-                  <img 
-                    src={item.imageUrl} 
-                    alt={item.title || "Gallery Image"} 
-                    className="w-full h-auto transform transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = '<div class="bg-slate-200 p-8 text-center text-slate-500"><p>Image not available</p></div>';
-                      }
-                    }}
-                  />
+                  {item.mediaType === 'video' ? (
+                    <video 
+                      src={item.imageUrl} 
+                      controls
+                      className="w-full h-auto transform transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLVideoElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="bg-slate-200 p-8 text-center text-slate-500"><p>Video not available</p></div>';
+                        }
+                      }}
+                    />
+                  ) : (
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title || "Gallery Image"} 
+                      className="w-full h-auto transform transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="bg-slate-200 p-8 text-center text-slate-500"><p>Image not available</p></div>';
+                        }
+                      }}
+                    />
+                  )}
                   {item.title && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center">
                       <div>
                         <h3 className="text-white font-bold text-lg">{item.title}</h3>
                         <p className="text-slate-300 text-sm">{item.category}</p>
+                        {item.mediaType === 'video' && (
+                          <span className="inline-block mt-2 px-2 py-1 bg-primary text-white text-xs rounded">Video</span>
+                        )}
                       </div>
                     </div>
                   )}

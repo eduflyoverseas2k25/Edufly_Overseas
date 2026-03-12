@@ -62,6 +62,7 @@ export const gallery = pgTable("gallery", {
   title: text("title"),
   imageUrl: text("image_url").notNull(),
   category: text("category"),
+  mediaType: text("media_type").default("image"), // 'image' or 'video'
 });
 
 // Destination Places (Landmarks to explore)

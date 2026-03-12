@@ -928,35 +928,49 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
   const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ title: "", imageUrl: "", category: "" });
+  const [formData, setFormData] = useState({ title: "", imageUrl: "", category: "", mediaType: "image" });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadType, setUploadType] = useState<'image' | 'video'>('image');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
       
-      if (!allowedTypes.includes(file.type)) {
-        toast({ title: "Only PNG, JPEG, and JPG image files are allowed", variant: "destructive" });
-        return;
-      }
-      
-      if (file.size > 10 * 1024 * 1024) { // 10MB
-        toast({ title: "File size must be less than 10MB", variant: "destructive" });
-        return;
+      if (uploadType === 'image') {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+          toast({ title: "Only PNG, JPEG, and JPG image files are allowed", variant: "destructive" });
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          toast({ title: "Image size must be less than 10MB", variant: "destructive" });
+          return;
+        }
+      } else {
+        const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
+        if (!allowedTypes.includes(file.type)) {
+          toast({ title: "Only MP4, MOV, and WEBM video files are allowed", variant: "destructive" });
+          return;
+        }
+        if (file.size > 50 * 1024 * 1024) {
+          toast({ title: "Video size must be less than 50MB", variant: "destructive" });
+          return;
+        }
       }
       
       setSelectedFile(file);
     }
   };
 
-  const uploadFile = async (file: File): Promise<string> => {
+  const uploadFile = async (file: File): Promise<{ url: string; mediaType: string }> => {
     const token = localStorage.getItem('admin_token');
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('/api/admin/upload/gallery', {
+    const endpoint = uploadType === 'video' ? '/api/admin/upload/video' : '/api/admin/upload/gallery';
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -969,7 +983,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
     }
 
     const data = await response.json();
-    return data.url;
+    return { url: data.url, mediaType: uploadType };
   };
 
   const createMutation = useMutation({
@@ -980,8 +994,9 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
       queryClient.invalidateQueries({ queryKey: ["/api/admin/gallery"] });
       toast({ title: "Gallery item created" });
       setIsAdding(false);
-      setFormData({ title: "", imageUrl: "", category: "" });
+      setFormData({ title: "", imageUrl: "", category: "", mediaType: "image" });
       setSelectedFile(null);
+      setUploadType('image');
     }
   });
 
@@ -989,17 +1004,20 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
     try {
       setUploading(true);
       let imageUrl = formData.imageUrl;
+      let mediaType = formData.mediaType;
 
       if (selectedFile) {
-        imageUrl = await uploadFile(selectedFile);
+        const result = await uploadFile(selectedFile);
+        imageUrl = result.url;
+        mediaType = result.mediaType;
       }
 
       if (!imageUrl) {
-        toast({ title: "Please upload a file or enter an image URL", variant: "destructive" });
+        toast({ title: "Please upload a file or enter a URL", variant: "destructive" });
         return;
       }
 
-      createMutation.mutate({ ...formData, imageUrl });
+      createMutation.mutate({ ...formData, imageUrl, mediaType });
     } catch (error) {
       toast({ title: "Failed to upload file", variant: "destructive" });
     } finally {
@@ -1023,7 +1041,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
       <div className="mb-8 flex justify-between items-center gap-4 flex-wrap">
         <h2 className="text-2xl font-bold font-heading text-slate-900">Manage Gallery</h2>
         <Button onClick={() => setIsAdding(true)} data-testid="button-add-gallery">
-          <Plus size={18} className="mr-2" /> Add Image
+          <Plus size={18} className="mr-2" /> Add Media
         </Button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1032,13 +1050,19 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
         ) : items.length > 0 ? (
           items.map((item) => (
             <div key={item.id} className="relative group rounded-lg overflow-hidden border border-border">
-              <img src={item.imageUrl || ""} alt={item.title || ""} className="w-full h-32 object-cover" />
+              {item.mediaType === 'video' ? (
+                <video src={item.imageUrl || ""} className="w-full h-32 object-cover" controls />
+              ) : (
+                <img src={item.imageUrl || ""} alt={item.title || ""} className="w-full h-32 object-cover" />
+              )}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Button size="icon" variant="ghost" className="text-white" onClick={() => setDeleteId(item.id)} data-testid={`button-delete-gallery-${item.id}`}>
                   <Trash2 size={20} />
                 </Button>
               </div>
-              <div className="p-2 text-sm truncate">{item.title}</div>
+              <div className="p-2 text-sm truncate">
+                {item.title} {item.mediaType === 'video' && <span className="text-xs text-primary">(Video)</span>}
+              </div>
             </div>
           ))
         ) : (
@@ -1046,10 +1070,10 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
         )}
       </div>
 
-      <Dialog open={isAdding} onOpenChange={() => { setIsAdding(false); setSelectedFile(null); }}>
+      <Dialog open={isAdding} onOpenChange={() => { setIsAdding(false); setSelectedFile(null); setUploadType('image'); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Gallery Image</DialogTitle>
+            <DialogTitle>Add Gallery Media</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1057,14 +1081,54 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
               <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} data-testid="input-gallery-title" />
             </div>
             <div>
-              <Label>Upload Image (PNG, JPEG, JPG - Max 10MB)</Label>
-              <Input 
-                type="file" 
-                accept=".png,.jpg,.jpeg,image/png,image/jpeg,image/jpg"
-                onChange={handleFileChange}
-                data-testid="input-gallery-file"
-                className="cursor-pointer"
-              />
+              <Label>Media Type</Label>
+              <div className="flex gap-4 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="mediaType"
+                    checked={uploadType === 'image'}
+                    onChange={() => { setUploadType('image'); setSelectedFile(null); }}
+                    className="cursor-pointer"
+                  />
+                  <span>Image</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="mediaType"
+                    checked={uploadType === 'video'}
+                    onChange={() => { setUploadType('video'); setSelectedFile(null); }}
+                    className="cursor-pointer"
+                  />
+                  <span>Video</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              {uploadType === 'image' ? (
+                <>
+                  <Label>Upload Image (PNG, JPEG, JPG - Max 10MB)</Label>
+                  <Input 
+                    type="file" 
+                    accept=".png,.jpg,.jpeg,image/png,image/jpeg,image/jpg"
+                    onChange={handleFileChange}
+                    data-testid="input-gallery-file"
+                    className="cursor-pointer"
+                  />
+                </>
+              ) : (
+                <>
+                  <Label>Upload Video (MP4, MOV, WEBM - Max 50MB)</Label>
+                  <Input 
+                    type="file" 
+                    accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm"
+                    onChange={handleFileChange}
+                    data-testid="input-gallery-video"
+                    className="cursor-pointer"
+                  />
+                </>
+              )}
               {selectedFile && (
                 <p className="text-sm text-green-600 mt-2">✓ Selected: {selectedFile.name}</p>
               )}
@@ -1078,12 +1142,12 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
               </div>
             </div>
             <div>
-              <Label>Image URL (Optional)</Label>
+              <Label>Media URL (Optional)</Label>
               <Input 
                 value={formData.imageUrl} 
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} 
                 data-testid="input-gallery-url"
-                placeholder="https://example.com/image.jpg"
+                placeholder={uploadType === 'image' ? "https://example.com/image.jpg" : "https://example.com/video.mp4"}
                 disabled={!!selectedFile}
               />
             </div>
@@ -1093,7 +1157,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsAdding(false); setSelectedFile(null); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setIsAdding(false); setSelectedFile(null); setUploadType('image'); }}>Cancel</Button>
             <Button onClick={handleSubmit} disabled={uploading || createMutation.isPending} data-testid="button-save-gallery">
               {(uploading || createMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {uploading ? 'Uploading...' : 'Create'}

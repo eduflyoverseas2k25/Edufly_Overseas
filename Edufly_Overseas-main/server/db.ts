@@ -76,8 +76,16 @@ export async function initializeDatabase() {
       id SERIAL PRIMARY KEY,
       title TEXT,
       image_url TEXT NOT NULL,
-      category TEXT
+      category TEXT,
+      media_type TEXT DEFAULT 'image'
     );
+    
+    -- Add media_type column if it doesn't exist
+    DO $$
+    BEGIN
+      ALTER TABLE gallery ADD COLUMN IF NOT EXISTS media_type TEXT DEFAULT 'image';
+    EXCEPTION WHEN others THEN NULL;
+    END $$;
     
     CREATE TABLE IF NOT EXISTS destination_places (
       id SERIAL PRIMARY KEY,

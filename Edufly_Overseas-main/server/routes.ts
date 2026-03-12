@@ -6,7 +6,7 @@ import { insertLeadSchema } from "@shared/schema";
 import { getThemeByKey } from "@shared/themes";
 import { initializeDatabase, pool } from "./db";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
-import { upload, deleteFile } from "./upload";
+import { upload, uploadVideo, deleteFile } from "./upload";
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   await initializeDatabase();
@@ -258,6 +258,26 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (err) {
       console.error("Upload error:", err);
       res.status(500).json({ message: "Failed to upload file" });
+    }
+  });
+
+  // Upload gallery video
+  app.post("/api/admin/upload/video", requireAdmin, uploadVideo.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileUrl = `/uploads/videos/${req.file.filename}`;
+      res.json({ 
+        message: "Video uploaded successfully", 
+        url: fileUrl,
+        filename: req.file.filename,
+        mediaType: 'video'
+      });
+    } catch (err) {
+      console.error("Video upload error:", err);
+      res.status(500).json({ message: "Failed to upload video" });
     }
   });
 

@@ -24,14 +24,14 @@ const storage = multer.diskStorage({
 
 // File filter for validation
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedTypes = /jpeg|jpg|png|pdf/;
+  const allowedTypes = /jpeg|jpg|png/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new Error('Only PNG, JPEG, JPG, and PDF files are allowed!'));
+    cb(new Error('Only PNG, JPEG, and JPG image files are allowed!'));
   }
 };
 

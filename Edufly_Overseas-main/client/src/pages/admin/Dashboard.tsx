@@ -935,10 +935,10 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
       
       if (!allowedTypes.includes(file.type)) {
-        toast({ title: "Only PNG, JPEG, JPG, and PDF files are allowed", variant: "destructive" });
+        toast({ title: "Only PNG, JPEG, and JPG image files are allowed", variant: "destructive" });
         return;
       }
       
@@ -1057,10 +1057,10 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
               <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} data-testid="input-gallery-title" />
             </div>
             <div>
-              <Label>Upload File (PNG, JPEG, JPG, PDF - Max 10MB)</Label>
+              <Label>Upload Image (PNG, JPEG, JPG - Max 10MB)</Label>
               <Input 
                 type="file" 
-                accept=".png,.jpg,.jpeg,.pdf"
+                accept=".png,.jpg,.jpeg,image/png,image/jpeg,image/jpg"
                 onChange={handleFileChange}
                 data-testid="input-gallery-file"
                 className="cursor-pointer"

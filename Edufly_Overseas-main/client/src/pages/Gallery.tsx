@@ -35,6 +35,14 @@ export default function Gallery() {
                     src={item.imageUrl} 
                     alt={item.title || "Gallery Image"} 
                     className="w-full h-auto transform transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="bg-slate-200 p-8 text-center text-slate-500"><p>Image not available</p></div>';
+                      }
+                    }}
                   />
                   {item.title && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center">

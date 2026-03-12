@@ -21,6 +21,15 @@ export async function uploadToS3(
   const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
   const key = `${folder}/${fileName}`;
 
+  console.log('=== S3 Upload Debug ===');
+  console.log('Bucket:', BUCKET_NAME);
+  console.log('Region:', process.env.AWS_REGION);
+  console.log('Key:', key);
+  console.log('File size:', file.size);
+  console.log('Content-Type:', file.mimetype);
+  console.log('AWS_ACCESS_KEY_ID exists:', !!process.env.AWS_ACCESS_KEY_ID);
+  console.log('AWS_SECRET_ACCESS_KEY exists:', !!process.env.AWS_SECRET_ACCESS_KEY);
+
   const uploadParams = {
     Bucket: BUCKET_NAME,
     Key: key,
@@ -39,10 +48,15 @@ export async function uploadToS3(
 
     // Return the public URL
     const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    console.log('Upload successful:', url);
     return url;
-  } catch (error) {
-    console.error('S3 Upload Error:', error);
-    throw new Error('Failed to upload file to S3');
+  } catch (error: any) {
+    console.error('=== S3 Upload Error ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Full error:', JSON.stringify(error, null, 2));
+    throw new Error(`S3 Upload failed: ${error.message}`);
   }
 }
 

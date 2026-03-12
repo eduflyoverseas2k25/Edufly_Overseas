@@ -227,9 +227,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Upload gallery image
   app.post("/api/admin/upload/gallery", requireAdmin, upload.single('file'), async (req, res) => {
     try {
+      console.log('=== Upload Gallery Request ===');
+      console.log('File received:', !!req.file);
+      
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
+
+      console.log('File name:', req.file.originalname);
+      console.log('File size:', req.file.size);
+      console.log('File type:', req.file.mimetype);
 
       // Validate file type and size
       if (!validateFileType(req.file, 'image')) {
@@ -247,9 +254,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         url: fileUrl,
         filename: req.file.originalname 
       });
-    } catch (err) {
-      console.error("Upload error:", err);
-      res.status(500).json({ message: "Failed to upload file" });
+    } catch (err: any) {
+      console.error("=== Upload Gallery Error ===");
+      console.error("Error:", err);
+      res.status(500).json({ 
+        message: "Failed to upload file", 
+        error: err.message,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
     }
   });
 
@@ -285,9 +297,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Upload gallery video
   app.post("/api/admin/upload/video", requireAdmin, uploadVideo.single('file'), async (req, res) => {
     try {
+      console.log('=== Upload Video Request ===');
+      console.log('File received:', !!req.file);
+      
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
+
+      console.log('File name:', req.file.originalname);
+      console.log('File size:', req.file.size);
+      console.log('File type:', req.file.mimetype);
 
       // Validate file type and size
       if (!validateFileType(req.file, 'video')) {
@@ -306,9 +325,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         filename: req.file.originalname,
         mediaType: 'video'
       });
-    } catch (err) {
-      console.error("Video upload error:", err);
-      res.status(500).json({ message: "Failed to upload video" });
+    } catch (err: any) {
+      console.error("=== Upload Video Error ===");
+      console.error("Error:", err);
+      res.status(500).json({ 
+        message: "Failed to upload video",
+        error: err.message,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
     }
   });
 

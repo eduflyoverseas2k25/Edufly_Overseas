@@ -293,8 +293,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!validateFileType(req.file, 'video')) {
         return res.status(400).json({ message: "Only MP4, MOV, and WEBM files are allowed" });
       }
-      if (!validateFileSize(req.file, 50)) {
-        return res.status(400).json({ message: "File size must be less than 50MB" });
+      if (!validateFileSize(req.file, 200)) {
+        return res.status(400).json({ message: "File size must be less than 200MB" });
       }
 
       // Upload to S3

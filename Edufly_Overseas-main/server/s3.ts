@@ -11,7 +11,7 @@ const s3Client = new S3Client({
   },
 });
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'edufly-s3-user';
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'edufly-overseas-media';
 
 // Upload file to S3
 export async function uploadToS3(

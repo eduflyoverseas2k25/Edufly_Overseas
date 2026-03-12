@@ -953,8 +953,8 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
           toast({ title: "Only MP4, MOV, and WEBM video files are allowed", variant: "destructive" });
           return;
         }
-        if (file.size > 50 * 1024 * 1024) {
-          toast({ title: "Video size must be less than 50MB", variant: "destructive" });
+        if (file.size > 200 * 1024 * 1024) {
+          toast({ title: "Video size must be less than 200MB", variant: "destructive" });
           return;
         }
       }
@@ -1119,7 +1119,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
                 </>
               ) : (
                 <>
-                  <Label>Upload Video (MP4, MOV, WEBM - Max 50MB)</Label>
+                  <Label>Upload Video (MP4, MOV, WEBM - Max 200MB)</Label>
                   <Input 
                     type="file" 
                     accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm"

@@ -71,7 +71,7 @@ export default function Home() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] lg:h-screen lg:min-h-[600px] flex items-center overflow-hidden py-20 lg:py-0">
+      <section className="relative min-h-[85vh] lg:min-h-[700px] flex items-center py-20 lg:py-24">
         {/* Background - Dynamic based on theme */}
         <div 
           className="absolute inset-0 z-0 transition-all duration-500" 
@@ -89,7 +89,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="container-custom relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-24 lg:pt-20">
+        <div className="container-custom relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

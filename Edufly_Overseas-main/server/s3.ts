@@ -35,7 +35,7 @@ export async function uploadToS3(
     Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
-    ACL: 'public-read' as const, // Make files publicly accessible
+    // ACL removed - using bucket policy for public access instead
   };
 
   try {

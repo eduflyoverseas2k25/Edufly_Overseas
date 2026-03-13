@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Globe, GraduationCap, Users, Award, CheckCircle, Plane } from "lucide-react";
+import { ArrowRight, Globe, GraduationCap, Users, Award, CheckCircle, Plane, ChevronLeft, ChevronRight, X, Quote } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { LeadForm } from "@/components/LeadForm";
 import { useDestinations, usePrograms, useTestimonials } from "@/hooks/use-resources";
 import { useSiteSettings, useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const { data: destinations } = useDestinations();
@@ -20,6 +22,49 @@ export default function Home() {
   const topDestinations = destinations?.slice(0, 4) || [];
   // Show top 6 program categories
   const topPrograms = programs?.slice(0, 6) || [];
+
+  // Testimonial lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedTestimonialIndex, setSelectedTestimonialIndex] = useState(0);
+
+  const openTestimonialLightbox = (index: number) => {
+    setSelectedTestimonialIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const goToPrevious = () => {
+    setSelectedTestimonialIndex((prev) => 
+      prev === 0 ? (testimonials?.length || 1) - 1 : prev - 1
+    );
+  };
+
+  const goToNext = () => {
+    setSelectedTestimonialIndex((prev) => 
+      prev === (testimonials?.length || 1) - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Keyboard navigation for testimonials
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightboxOpen) return;
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToPrevious();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === 'Escape') {
+        setLightboxOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, testimonials?.length]);
+
+  const selectedTestimonial = testimonials?.[selectedTestimonialIndex];
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,6 +262,129 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      {testimonials && testimonials.length > 0 && (
+        <section className="section-padding bg-slate-50">
+          <div className="container-custom">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">
+                What Our Students Say
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Hear from students and parents who experienced our educational tours
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {testimonials.slice(0, 6).map((testimonial, index) => (
+                <div
+                  key={testimonial.id}
+                  className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow cursor-pointer group"
+                  onClick={() => openTestimonialLightbox(index)}
+                >
+                  <Quote className="w-10 h-10 text-primary/20 mb-4" />
+                  
+                  <p className="text-slate-700 mb-6 line-clamp-4 italic">
+                    "{testimonial.content}"
+                  </p>
+
+                  <div className="flex items-center gap-4">
+                    {testimonial.imageUrl && (
+                      <img
+                        src={testimonial.imageUrl}
+                        alt={testimonial.name}
+                        className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+                      />
+                    )}
+                    <div>
+                      <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
+                      <p className="text-sm text-slate-600">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {testimonials.length > 6 && (
+              <div className="text-center mt-12">
+                <Button variant="outline" size="lg">
+                  View All Testimonials
+                </Button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Testimonial Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] p-0 bg-white border-none">
+          {/* Close Button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6 text-slate-700" />
+          </button>
+
+          {/* Previous Button */}
+          {testimonials && testimonials.length > 1 && (
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="w-8 h-8 text-slate-700" />
+            </button>
+          )}
+
+          {/* Next Button */}
+          {testimonials && testimonials.length > 1 && (
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="w-8 h-8 text-slate-700" />
+            </button>
+          )}
+
+          {selectedTestimonial && (
+            <div className="p-12">
+              <div className="flex flex-col items-center text-center">
+                <Quote className="w-16 h-16 text-primary/30 mb-6" />
+                
+                <p className="text-xl md:text-2xl text-slate-700 mb-8 italic leading-relaxed">
+                  "{selectedTestimonial.content}"
+                </p>
+
+                {selectedTestimonial.imageUrl && (
+                  <img
+                    src={selectedTestimonial.imageUrl}
+                    alt={selectedTestimonial.name}
+                    className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20 mb-4"
+                  />
+                )}
+
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                  {selectedTestimonial.name}
+                </h3>
+                <p className="text-lg text-slate-600">
+                  {selectedTestimonial.role}
+                </p>
+
+                {testimonials && testimonials.length > 1 && (
+                  <p className="text-sm text-slate-500 mt-6">
+                    {selectedTestimonialIndex + 1} / {testimonials.length}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* CTA Section */}
       <section className="py-20 bg-primary relative overflow-hidden">

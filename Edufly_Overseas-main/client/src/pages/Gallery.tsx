@@ -1,23 +1,33 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useGallery } from "@/hooks/use-resources";
-import { Loader2, X, Play } from "lucide-react";
+import { Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function Gallery() {
   const { data: gallery, isLoading } = useGallery();
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Separate photos and videos
   const photos = gallery?.filter(item => item.mediaType !== 'video') || [];
   const videos = gallery?.filter(item => item.mediaType === 'video') || [];
 
-  const openLightbox = (item: any) => {
-    setSelectedMedia(item);
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
     setLightboxOpen(true);
   };
+
+  const goToPrevious = () => {
+    setSelectedIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setSelectedIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+  };
+
+  const selectedMedia = photos[selectedIndex];
 
   return (
     <div className="min-h-screen bg-white">
@@ -49,11 +59,11 @@ export default function Gallery() {
             </div>
           ) : photos.length > 0 ? (
             <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              {photos.map((item) => (
+              {photos.map((item, index) => (
                 <div 
                   key={item.id} 
                   className="break-inside-avoid rounded-xl overflow-hidden group relative cursor-pointer shadow-md hover:shadow-xl transition-shadow"
-                  onClick={() => openLightbox(item)}
+                  onClick={() => openLightbox(index)}
                 >
                   <img 
                     src={item.imageUrl} 
@@ -134,15 +144,39 @@ export default function Gallery() {
         </section>
       )}
 
-      {/* Lightbox Modal for Full Screen Photos */}
+      {/* Lightbox Modal with Navigation */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 bg-black/95 border-none">
+          {/* Close Button */}
           <button
             onClick={() => setLightboxOpen(false)}
             className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label="Close"
           >
             <X className="w-6 h-6 text-white" />
           </button>
+
+          {/* Previous Button */}
+          {photos.length > 1 && (
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-8 h-8 text-white" />
+            </button>
+          )}
+
+          {/* Next Button */}
+          {photos.length > 1 && (
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-8 h-8 text-white" />
+            </button>
+          )}
           
           {selectedMedia && (
             <div className="w-full h-full flex flex-col items-center justify-center p-8">
@@ -161,6 +195,11 @@ export default function Gallery() {
                   )}
                   {selectedMedia.category && (
                     <p className="text-lg text-white/80">{selectedMedia.category}</p>
+                  )}
+                  {photos.length > 1 && (
+                    <p className="text-sm text-white/60 mt-4">
+                      {selectedIndex + 1} / {photos.length}
+                    </p>
                   )}
                 </div>
               )}

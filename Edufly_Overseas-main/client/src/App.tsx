@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SarahChatbot } from "@/components/SarahChatbot";
 import NotFound from "@/pages/not-found";
 
 // Public Pages
@@ -52,6 +53,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <SarahChatbot />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

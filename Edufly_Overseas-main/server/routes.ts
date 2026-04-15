@@ -161,10 +161,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Create Razorpay Order
   app.post("/api/payment/create-order", async (req, res) => {
     try {
-      const { name, phone, program, amount } = req.body;
+      const { name, phone, program, amount, paymentType } = req.body;
       
-      if (!name || !phone || !amount) {
-        return res.status(400).json({ message: "Name, phone, and amount are required" });
+      if (!name || !phone || !amount || !paymentType) {
+        return res.status(400).json({ message: "Name, phone, amount, and payment type are required" });
       }
 
       if (!isRazorpayConfigured() || !razorpayInstance) {
@@ -175,6 +175,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       // Amount should be in paise (multiply by 100)
       const amountInPaise = parseInt(amount) * 100;
+      
+      // Get full amount from settings for total_amount
+      const settingsResult = await pool.query('SELECT payment_full_amount FROM site_settings LIMIT 1');
+      const fullAmount = settingsResult.rows[0]?.payment_full_amount || 350000;
+      
+      // Calculate total and remaining
+      const totalAmount = fullAmount * 100; // in paise
+      const paidAmount = amountInPaise;
+      const remainingAmount = paymentType === 'full' ? 0 : (totalAmount - paidAmount);
 
       const options = {
         amount: amountInPaise,
@@ -183,7 +192,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         notes: {
           name,
           phone,
-          program: program || 'NASA'
+          program: program || 'NASA',
+          paymentType
         }
       };
 
@@ -191,9 +201,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       // Save initial payment record
       await pool.query(
-        `INSERT INTO payments (name, phone, program, amount, order_id, status) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [name, phone, program || 'NASA', amountInPaise, order.id, 'pending']
+        `INSERT INTO payments (name, phone, program, total_amount, paid_amount, remaining_amount, payment_type, order_id, status) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [name, phone, program || 'NASA', totalAmount, paidAmount, remainingAmount, paymentType, order.id, 'pending']
       );
 
       res.json({
@@ -228,14 +238,31 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       if (isAuthentic) {
         // Update payment status to success
-        await pool.query(
+        const updateResult = await pool.query(
           `UPDATE payments 
            SET payment_id = $1, signature = $2, status = $3 
-           WHERE order_id = $4`,
+           WHERE order_id = $4
+           RETURNING payment_type, remaining_amount`,
           [razorpay_payment_id, razorpay_signature, 'success', razorpay_order_id]
         );
 
-        // Get payment details
+        const paymentRecord = updateResult.rows[0];
+        
+        // Determine final status based on payment type
+        let finalStatus = 'success';
+        if (paymentRecord.payment_type === 'full' || paymentRecord.remaining_amount === 0) {
+          finalStatus = 'success'; // Fully paid
+        } else {
+          finalStatus = 'partially_paid'; // Part payment
+        }
+        
+        // Update with final status
+        await pool.query(
+          `UPDATE payments SET status = $1 WHERE order_id = $2`,
+          [finalStatus, razorpay_order_id]
+        );
+
+        // Get updated payment details
         const result = await pool.query(
           `SELECT * FROM payments WHERE order_id = $1`,
           [razorpay_order_id]
@@ -505,6 +532,50 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (err) {
       console.error("Error fetching payment:", err);
       res.status(500).json({ message: "Failed to fetch payment" });
+    }
+  });
+
+  // Get Payment Settings (Public - for Sarah chatbot)
+  app.get("/api/payment/settings", async (req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT payment_full_amount, payment_enable_part_payment FROM site_settings LIMIT 1`
+      );
+      
+      if (result.rows.length === 0) {
+        return res.json({
+          fullAmount: 350000,
+          enablePartPayment: true
+        });
+      }
+
+      const settings = result.rows[0];
+      res.json({
+        fullAmount: settings.payment_full_amount || 350000,
+        enablePartPayment: settings.payment_enable_part_payment !== false
+      });
+    } catch (err) {
+      console.error("Error fetching payment settings:", err);
+      res.status(500).json({ message: "Failed to fetch payment settings" });
+    }
+  });
+
+  // Update Payment Settings (Admin only)
+  app.patch("/api/admin/payment-settings", requireAdmin, async (req, res) => {
+    try {
+      const { fullAmount, enablePartPayment } = req.body;
+
+      await pool.query(
+        `UPDATE site_settings 
+         SET payment_full_amount = $1, payment_enable_part_payment = $2
+         WHERE id = 1`,
+        [fullAmount, enablePartPayment]
+      );
+
+      res.json({ success: true, message: "Payment settings updated" });
+    } catch (err) {
+      console.error("Error updating payment settings:", err);
+      res.status(500).json({ message: "Failed to update payment settings" });
     }
   });
 

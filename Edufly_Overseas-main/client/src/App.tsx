@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SarahChatbot } from "@/components/SarahChatbot";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import NotFound from "@/pages/not-found";
 
 // Public Pages
@@ -54,6 +55,7 @@ function App() {
           <Toaster />
           <Router />
           <SarahChatbot />
+          <WhatsAppButton />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

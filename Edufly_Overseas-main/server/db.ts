@@ -44,7 +44,10 @@ export async function initializeDatabase() {
       name TEXT NOT NULL,
       phone TEXT NOT NULL,
       program TEXT NOT NULL DEFAULT 'NASA',
-      amount INTEGER NOT NULL,
+      total_amount INTEGER NOT NULL,
+      paid_amount INTEGER NOT NULL,
+      remaining_amount INTEGER DEFAULT 0,
+      payment_type TEXT DEFAULT 'full',
       payment_id TEXT,
       order_id TEXT,
       signature TEXT,
@@ -143,7 +146,9 @@ export async function initializeDatabase() {
       about_vision TEXT,
       about_values TEXT,
       home_features_title TEXT DEFAULT 'Why Choose Edufly Overseas',
-      home_features_subtitle TEXT DEFAULT 'Experience the difference with our comprehensive educational travel services'
+      home_features_subtitle TEXT DEFAULT 'Experience the difference with our comprehensive educational travel services',
+      payment_full_amount INTEGER DEFAULT 350000,
+      payment_enable_part_payment BOOLEAN DEFAULT TRUE
     );
     
     -- Add missing columns for destination_places

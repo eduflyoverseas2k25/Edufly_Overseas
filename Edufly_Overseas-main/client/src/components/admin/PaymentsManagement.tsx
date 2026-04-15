@@ -13,7 +13,11 @@ interface Payment {
   name: string;
   phone: string;
   program: string;
-  amount: number;
+  total_amount?: number;
+  paid_amount?: number;
+  remaining_amount?: number;
+  payment_type?: string;
+  amount: number; // legacy field
   payment_id?: string;
   order_id: string;
   status: string;
@@ -72,6 +76,7 @@ export function PaymentsManagement() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800';
+      case 'partially_paid': return 'bg-orange-100 text-orange-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'failed': return 'bg-red-100 text-red-800';
       case 'refunded': return 'bg-gray-100 text-gray-800';
@@ -189,7 +194,10 @@ export function PaymentsManagement() {
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Phone</th>
                 <th className="px-6 py-4">Program</th>
-                <th className="px-6 py-4">Amount</th>
+                <th className="px-6 py-4">Total</th>
+                <th className="px-6 py-4">Paid</th>
+                <th className="px-6 py-4">Remaining</th>
+                <th className="px-6 py-4">Type</th>
                 <th className="px-6 py-4">Payment ID</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Date</th>
@@ -198,7 +206,7 @@ export function PaymentsManagement() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
-                <tr><td colSpan={8} className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>
+                <tr><td colSpan={11} className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>
               ) : payments.length > 0 ? (
                 payments.map((payment) => (
                   <tr 
@@ -213,13 +221,22 @@ export function PaymentsManagement() {
                     </td>
                     <td className="px-6 py-4 text-slate-600">{payment.phone}</td>
                     <td className="px-6 py-4 text-slate-600">{payment.program}</td>
-                    <td className="px-6 py-4 font-semibold">{formatAmount(payment.amount)}</td>
+                    <td className="px-6 py-4 font-semibold">{formatAmount(payment.total_amount || payment.amount)}</td>
+                    <td className="px-6 py-4 font-semibold text-green-700">{formatAmount(payment.paid_amount || payment.amount)}</td>
+                    <td className="px-6 py-4 font-semibold text-orange-700">{formatAmount(payment.remaining_amount || 0)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        payment.payment_type === 'full' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {payment.payment_type === 'full' ? 'FULL' : 'PART'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-xs text-slate-500 font-mono">
                       {payment.payment_id ? payment.payment_id.substring(0, 20) + '...' : '-'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.status)}`}>
-                        {payment.status.toUpperCase()}
+                        {payment.status.toUpperCase().replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">{formatDate(payment.created_at)}</td>
@@ -242,7 +259,7 @@ export function PaymentsManagement() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">No payments found</td></tr>
+                <tr><td colSpan={11} className="p-8 text-center text-muted-foreground">No payments found</td></tr>
               )}
             </tbody>
           </table>

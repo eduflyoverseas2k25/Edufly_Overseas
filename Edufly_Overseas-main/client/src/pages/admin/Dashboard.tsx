@@ -1788,6 +1788,54 @@ function SettingsPanel() {
         </div>
       </div>
 
+      {/* Payment Configuration */}
+      <div className="mt-8 bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h3 className="font-bold text-lg border-b pb-4 mb-6">Payment Configuration</h3>
+        <div className="space-y-6">
+          <div>
+            <Label>Full Payment Amount (₹)</Label>
+            <Input 
+              type="number"
+              value={currentSettings.paymentFullAmount || 350000} 
+              onChange={(e) => setFormData({ ...formData, paymentFullAmount: parseInt(e.target.value) || 350000 })}
+              placeholder="350000"
+              data-testid="input-payment-full-amount"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              This is the full payment amount for the NASA program. Part payment will be 1/3 of this amount.
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Enable Part Payment Option</Label>
+              <p className="text-xs text-muted-foreground">
+                When enabled, users can choose to pay 1/3 of the full amount
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={currentSettings.paymentEnablePartPayment !== false}
+                onChange={(e) => setFormData({ ...formData, paymentEnablePartPayment: e.target.checked })}
+                className="sr-only peer"
+                data-testid="toggle-enable-part-payment"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          
+          <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-sm text-amber-800">
+              <strong>Current Settings:</strong><br />
+              Full Payment: ₹{(currentSettings.paymentFullAmount || 350000).toLocaleString('en-IN')}<br />
+              Part Payment (1/3): ₹{Math.floor((currentSettings.paymentFullAmount || 350000) / 3).toLocaleString('en-IN')}<br />
+              Part Payment Status: {currentSettings.paymentEnablePartPayment !== false ? '✅ Enabled' : '❌ Disabled'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-800">
           <strong>Note:</strong> After saving changes, the website will automatically update with the new theme colors and content. 

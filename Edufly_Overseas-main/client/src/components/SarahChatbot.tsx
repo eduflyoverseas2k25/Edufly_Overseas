@@ -222,37 +222,66 @@ export function SarahChatbot() {
     );
   };
 
-  const handlePaymentStart = () => {
+  const handlePaymentStart = async () => {
     addUserMessage("Make Payment");
-    addBotMessage(
-      "You can make payment for the **NASA STEM Educational Tour** (₹3,50,000).\n\nChoose payment option:",
-      [
-        { label: "💳 Full Payment (₹3,50,000)", action: "pay_now", data: { type: 'full', amount: 350000 } },
-        { label: "💰 Part Payment", action: "pay_now", data: { type: 'part', amount: 0 } },
-        { label: "← Back", action: "back_to_main" }
-      ]
-    );
+    
+    try {
+      // Fetch payment settings from backend
+      const response = await fetch('/api/payment/settings');
+      const settings = await response.json();
+      
+      const fullAmount = settings.fullAmount || 350000;
+      const partAmount = Math.floor(fullAmount / 3);
+      const enablePartPayment = settings.enablePartPayment !== false;
+      
+      const buttons = [
+        { 
+          label: `💳 Full Payment (₹${fullAmount.toLocaleString('en-IN')})`, 
+          action: "pay_now", 
+          data: { type: 'full', amount: fullAmount } 
+        }
+      ];
+      
+      if (enablePartPayment) {
+        buttons.push({
+          label: `💰 Part Payment (₹${partAmount.toLocaleString('en-IN')} - 1/3)`,
+          action: "pay_now",
+          data: { type: 'part', amount: partAmount }
+        });
+      }
+      
+      buttons.push({ label: "← Back", action: "back_to_main" });
+      
+      addBotMessage(
+        `You can make payment for the **NASA STEM Educational Tour** (₹${fullAmount.toLocaleString('en-IN')}).\n\nChoose payment option:`,
+        buttons
+      );
+    } catch (error) {
+      console.error('Error fetching payment settings:', error);
+      // Fallback to default
+      addBotMessage(
+        "You can make payment for the **NASA STEM Educational Tour**.\n\nChoose payment option:",
+        [
+          { label: "💳 Full Payment (₹3,50,000)", action: "pay_now", data: { type: 'full', amount: 350000 } },
+          { label: "💰 Part Payment (₹1,16,667 - 1/3)", action: "pay_now", data: { type: 'part', amount: 116667 } },
+          { label: "← Back", action: "back_to_main" }
+        ]
+      );
+    }
   };
 
   const handlePayNow = (data: any) => {
     const paymentType = data?.type || 'full';
-    addUserMessage(paymentType === 'full' ? 'Full Payment' : 'Part Payment');
+    const amount = data?.amount || 350000;
     
-    if (paymentType === 'part') {
-      setPaymentData({ paymentType: 'part' });
-      setCurrentFlow('payment_amount');
-      addBotMessage(
-        "Please enter the amount you want to pay now (minimum ₹50,000):",
-        []
-      );
-    } else {
-      setPaymentData({ paymentType: 'full', amount: 350000 });
-      setCurrentFlow('payment_name');
-      addBotMessage(
-        `To proceed with **full payment** of ₹3,50,000, please provide:\n\n**Student Name:**`,
-        []
-      );
-    }
+    addUserMessage(paymentType === 'full' ? 'Full Payment' : `Part Payment (₹${amount.toLocaleString('en-IN')})`);
+    
+    setPaymentData({ paymentType, amount });
+    setCurrentFlow('payment_name');
+    addBotMessage(
+      `To proceed with **${paymentType === 'full' ? 'full' : 'part'}  payment** of ₹${amount.toLocaleString('en-IN')}, please provide:\n\n**Student Name:**`,
+      []
+    );
   };
 
   const handleWhatsApp = () => {
@@ -317,15 +346,6 @@ export function SarahChatbot() {
       const finalLeadData = { ...leadData, studentGrade: text };
       setLeadData(finalLeadData);
       await saveLeadAndRedirect(finalLeadData);
-    } else if (currentFlow === 'payment_amount') {
-      const amount = parseInt(text.replace(/[^0-9]/g, ''));
-      if (amount < 50000) {
-        addBotMessage("Minimum part payment is ₹50,000. Please enter a valid amount:", []);
-        return;
-      }
-      setPaymentData(prev => ({ ...prev, amount }));
-      setCurrentFlow('payment_name');
-      addBotMessage(`Great! Proceeding with payment of ₹${amount.toLocaleString('en-IN')}.\n\n**Student Name:**`, []);
     } else if (currentFlow === 'payment_name') {
       setPaymentData(prev => ({ ...prev, studentName: text }));
       setCurrentFlow('payment_phone');
@@ -393,7 +413,8 @@ export function SarahChatbot() {
           name: data.studentName,
           phone: data.parentPhone,
           program: 'NASA',
-          amount: data.amount
+          amount: data.amount,
+          paymentType: data.paymentType || 'full'
         })
       });
 

@@ -167,7 +167,7 @@ export default function Home() {
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Why Choose Edufly?</h2>
-            <p className="text-lg text-muted-foreground">We bring decades of experience organizing educational tours that combine learning, culture, and adventure.</p>
+            <p className="text-lg text-slate-700">We bring decades of experience organizing educational tours that combine learning, culture, and adventure.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -198,7 +198,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Popular Destinations</h2>
-              <p className="text-lg text-muted-foreground">Explore our carefully curated tour destinations across 11 countries.</p>
+              <p className="text-lg text-slate-700">Explore our carefully curated tour destinations across 11 countries.</p>
             </div>
             <Link href="/destinations">
               <Button variant="outline" className="hidden md:flex gap-2">
@@ -247,7 +247,7 @@ export default function Home() {
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Tour Experiences</h2>
-            <p className="text-lg text-muted-foreground">Every destination offers unique cultural, historical, and educational experiences.</p>
+            <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -256,7 +256,7 @@ export default function Home() {
                 <div className="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-600 mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   <GraduationCap size={24} />
                 </div>
-                <h3 className="font-bold text-sm md:text-base">{cat}</h3>
+                <h3 className="font-bold text-sm md:text-base text-slate-900">{cat}</h3>
               </div>
             ))}
           </div>
@@ -271,7 +271,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">
                 What Our Students Say
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-slate-700">
                 Hear from students and parents who experienced our educational tours
               </p>
             </div>

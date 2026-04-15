@@ -25,6 +25,15 @@ interface PaymentData extends LeadData {
   paymentType?: 'full' | 'part';
 }
 
+interface UserStatus {
+  name: string | null;
+  status: 'new' | 'lead' | 'partial' | 'full';
+  total_amount: number | null;
+  paid_amount: number | null;
+  remaining_amount: number | null;
+  payment_id: string | null;
+}
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -40,6 +49,8 @@ export function SarahChatbot() {
   const [paymentData, setPaymentData] = useState<PaymentData>({});
   const [currentFlow, setCurrentFlow] = useState<string>('main');
   const [inputValue, setInputValue] = useState('');
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -49,6 +60,29 @@ export function SarahChatbot() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Check for returning user on mount
+  useEffect(() => {
+    const storedPhone = localStorage.getItem('sarah_user_phone');
+    if (storedPhone) {
+      checkUserStatus(storedPhone);
+    }
+  }, []);
+
+  const checkUserStatus = async (phone: string) => {
+    try {
+      const response = await fetch(`/api/user/status?phone=${encodeURIComponent(phone)}`);
+      const status: UserStatus = await response.json();
+      
+      if (status.status !== 'new') {
+        setUserStatus(status);
+        setIsReturningUser(true);
+        setLeadData({ parentPhone: phone, studentName: status.name || undefined });
+      }
+    } catch (error) {
+      console.error('Error checking user status:', error);
+    }
+  };
 
   // Show greeting animation after 5-8 seconds (once only)
   useEffect(() => {
@@ -88,19 +122,85 @@ export function SarahChatbot() {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      addBotMessage(
-        "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, payment, and answer questions about our destinations and services.\n\nWhat would you like to do?",
-        [
-          { label: "🚀 View NASA Program", action: "nasa_trip" },
-          { label: "🌍 Explore Destinations", action: "destinations" },
-          { label: "📝 Register Interest", action: "register" },
-          { label: "💳 Make Payment", action: "payment" },
-          { label: "ℹ️ About Edufly", action: "about" },
-          { label: "💬 Talk on WhatsApp", action: "whatsapp" }
-        ]
-      );
+      // Check if returning user with status
+      if (isReturningUser && userStatus) {
+        handleReturningUserGreeting(userStatus);
+      } else {
+        // New user - normal greeting
+        addBotMessage(
+          "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, payment, and answer questions about our destinations and services.\n\nWhat would you like to do?",
+          [
+            { label: "🚀 View NASA Program", action: "nasa_trip" },
+            { label: "🌍 Explore Destinations", action: "destinations" },
+            { label: "📝 Register Interest", action: "register" },
+            { label: "💳 Make Payment", action: "payment" },
+            { label: "ℹ️ About Edufly", action: "about" },
+            { label: "💬 Talk on WhatsApp", action: "whatsapp" }
+          ]
+        );
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isReturningUser, userStatus]);
+
+  const handleReturningUserGreeting = (status: UserStatus) => {
+    const name = status.name || 'there';
+    
+    switch (status.status) {
+      case 'lead':
+        // Lead exists but no payment
+        addBotMessage(
+          `Welcome back, **${name}**! 👋\n\nI see you've shown interest in the NASA STEM Educational Tour.\n\nWould you like to continue your registration or make a payment?`,
+          [
+            { label: "📝 Continue Registration", action: "register_continue", data: { name } },
+            { label: "💳 Make Payment", action: "payment" },
+            { label: "💬 Talk on WhatsApp", action: "whatsapp" },
+            { label: "🚀 View NASA Program", action: "nasa_trip" }
+          ]
+        );
+        break;
+        
+      case 'partial':
+        // Partially paid
+        const remaining = status.remaining_amount ? (status.remaining_amount / 100) : 0;
+        const paid = status.paid_amount ? (status.paid_amount / 100) : 0;
+        
+        addBotMessage(
+          `Welcome back, **${name}**! 👋\n\n**Payment Status:**\n✅ Paid: ₹${paid.toLocaleString('en-IN')}\n⚠️ Remaining: ₹${remaining.toLocaleString('en-IN')}\n\nWould you like to complete your payment?`,
+          [
+            { label: "💳 Pay Remaining Balance", action: "pay_remaining", data: { amount: remaining, name } },
+            { label: "💬 WhatsApp Support", action: "whatsapp" },
+            { label: "📄 View Payment Details", action: "view_payment_details" }
+          ]
+        );
+        break;
+        
+      case 'full':
+        // Fully paid
+        addBotMessage(
+          `Welcome back, **${name}**! 👋\n\n✅ **Your payment is complete!**\n\nYour seat for the NASA STEM Educational Tour has been confirmed.\n\nWhat would you like to do?`,
+          [
+            { label: "📥 Download Receipt", action: "download_receipt", data: { paymentId: status.payment_id } },
+            { label: "💬 Contact Support", action: "whatsapp" },
+            { label: "ℹ️ Program Details", action: "nasa_trip" }
+          ]
+        );
+        break;
+        
+      default:
+        // Fallback to normal greeting
+        addBotMessage(
+          "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, payment, and answer questions about our destinations and services.\n\nWhat would you like to do?",
+          [
+            { label: "🚀 View NASA Program", action: "nasa_trip" },
+            { label: "🌍 Explore Destinations", action: "destinations" },
+            { label: "📝 Register Interest", action: "register" },
+            { label: "💳 Make Payment", action: "payment" },
+            { label: "ℹ️ About Edufly", action: "about" },
+            { label: "💬 Talk on WhatsApp", action: "whatsapp" }
+          ]
+        );
+    }
+  };
 
   const addBotMessage = (text: string, buttons?: Array<{ label: string; action: string; data?: any }>) => {
     const message: Message = {
@@ -137,8 +237,20 @@ export function SarahChatbot() {
       case 'register':
         handleRegisterStart();
         break;
+      case 'register_continue':
+        handleRegisterContinue(data);
+        break;
       case 'payment':
         handlePaymentStart();
+        break;
+      case 'pay_remaining':
+        handlePayRemaining(data);
+        break;
+      case 'view_payment_details':
+        handleViewPaymentDetails();
+        break;
+      case 'download_receipt':
+        handleDownloadReceipt(data);
         break;
       case 'whatsapp':
         handleWhatsApp();
@@ -183,6 +295,72 @@ export function SarahChatbot() {
       { label: "📞 Contact Us", action: "whatsapp" },
       { label: "← Back", action: "back_to_main" }
     ]);
+  };
+
+  const handleRegisterContinue = (data: any) => {
+    addUserMessage("Continue Registration");
+    setLeadData({ studentName: data.name });
+    setCurrentFlow('register_phone');
+    addBotMessage(
+      `Great to have you back, **${data.name}**!\n\nLet's complete your registration.\n\n**Parent's phone number:**`,
+      []
+    );
+  };
+
+  const handlePayRemaining = (data: any) => {
+    addUserMessage(`Pay Remaining Balance (₹${data.amount.toLocaleString('en-IN')})`);
+    setPaymentData({ 
+      paymentType: 'part', 
+      amount: data.amount,
+      studentName: data.name 
+    });
+    setCurrentFlow('payment_phone');
+    addBotMessage(
+      `Processing remaining payment of **₹${data.amount.toLocaleString('en-IN')}**.\n\n**Parent's phone number:**`,
+      []
+    );
+  };
+
+  const handleViewPaymentDetails = () => {
+    addUserMessage("View Payment Details");
+    if (userStatus) {
+      const total = userStatus.total_amount ? (userStatus.total_amount / 100) : 0;
+      const paid = userStatus.paid_amount ? (userStatus.paid_amount / 100) : 0;
+      const remaining = userStatus.remaining_amount ? (userStatus.remaining_amount / 100) : 0;
+      
+      const text = `**Payment Details**\n\n` +
+        `💰 Total Amount: ₹${total.toLocaleString('en-IN')}\n` +
+        `✅ Paid: ₹${paid.toLocaleString('en-IN')}\n` +
+        `⚠️ Remaining: ₹${remaining.toLocaleString('en-IN')}\n\n` +
+        `Transaction ID: ${userStatus.payment_id || 'N/A'}`;
+      
+      addBotMessage(text, [
+        { label: "💳 Pay Remaining", action: "pay_remaining", data: { amount: remaining, name: userStatus.name } },
+        { label: "💬 WhatsApp Support", action: "whatsapp" },
+        { label: "← Back", action: "back_to_main" }
+      ]);
+    }
+  };
+
+  const handleDownloadReceipt = (data: any) => {
+    addUserMessage("Download Receipt");
+    
+    if (data.paymentId) {
+      addBotMessage(
+        `✅ **Receipt Ready**\n\nYour payment receipt is available.\n\n**Transaction ID:** ${data.paymentId}\n\nPlease contact us on WhatsApp to receive your official receipt.`,
+        [
+          { label: "💬 Get Receipt on WhatsApp", action: "whatsapp" },
+          { label: "← Back", action: "back_to_main" }
+        ]
+      );
+    } else {
+      addBotMessage(
+        "Unable to find payment details. Please contact support.",
+        [
+          { label: "💬 WhatsApp Support", action: "whatsapp" }
+        ]
+      );
+    }
   };
 
   const handleNASATrip = () => {
@@ -377,6 +555,11 @@ export function SarahChatbot() {
         })
       });
 
+      // Store phone in localStorage for returning user recognition
+      if (data.parentPhone) {
+        localStorage.setItem('sarah_user_phone', data.parentPhone);
+      }
+
       // Redirect to WhatsApp
       const whatsappMessage = encodeURIComponent(
         `Hi! I'm interested in the NASA STEM Educational Tour.\n\nStudent Name: ${data.studentName}\nParent Phone: ${data.parentPhone}\nGrade: ${data.studentGrade}`
@@ -456,6 +639,11 @@ export function SarahChatbot() {
           const verifyData = await verifyResponse.json();
 
           if (verifyData.success) {
+            // Store phone in localStorage
+            if (data.parentPhone) {
+              localStorage.setItem('sarah_user_phone', data.parentPhone);
+            }
+            
             addBotMessage(
               `✅ Payment successful!\n\nTransaction ID: ${response.razorpay_payment_id}\n\nYour seat for the NASA STEM Educational Tour has been confirmed. We'll contact you soon with further details.`,
               [{ label: "← Back to Main Menu", action: "back_to_main" }]

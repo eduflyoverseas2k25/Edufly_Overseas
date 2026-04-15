@@ -560,6 +560,107 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // Get User Status (Public - for Sarah returning user recognition)
+  app.get("/api/user/status", async (req, res) => {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      // Check for lead
+      const leadResult = await pool.query(
+        `SELECT name, grade, program FROM leads WHERE phone = $1 ORDER BY created_at DESC LIMIT 1`,
+        [phone]
+      );
+
+      // Check for payments
+      const paymentResult = await pool.query(
+        `SELECT 
+          name, 
+          total_amount, 
+          paid_amount, 
+          remaining_amount, 
+          payment_type,
+          status,
+          payment_id,
+          created_at
+         FROM payments 
+         WHERE phone = $1 
+         ORDER BY created_at DESC 
+         LIMIT 1`,
+        [phone]
+      );
+
+      // Determine status
+      let userStatus = {
+        name: null,
+        status: 'new',
+        total_amount: null,
+        paid_amount: null,
+        remaining_amount: null,
+        payment_id: null,
+        created_at: null
+      };
+
+      if (paymentResult.rows.length > 0) {
+        const payment = paymentResult.rows[0];
+        
+        // User has payment record
+        if (payment.status === 'success') {
+          userStatus = {
+            name: payment.name,
+            status: 'full',
+            total_amount: payment.total_amount,
+            paid_amount: payment.paid_amount,
+            remaining_amount: 0,
+            payment_id: payment.payment_id,
+            created_at: payment.created_at
+          };
+        } else if (payment.status === 'partially_paid') {
+          userStatus = {
+            name: payment.name,
+            status: 'partial',
+            total_amount: payment.total_amount,
+            paid_amount: payment.paid_amount,
+            remaining_amount: payment.remaining_amount,
+            payment_id: payment.payment_id,
+            created_at: payment.created_at
+          };
+        } else {
+          // Payment exists but failed/pending - treat as lead
+          userStatus = {
+            name: payment.name,
+            status: 'lead',
+            total_amount: null,
+            paid_amount: null,
+            remaining_amount: null,
+            payment_id: null,
+            created_at: payment.created_at
+          };
+        }
+      } else if (leadResult.rows.length > 0) {
+        // User has lead but no payment
+        const lead = leadResult.rows[0];
+        userStatus = {
+          name: lead.name,
+          status: 'lead',
+          total_amount: null,
+          paid_amount: null,
+          remaining_amount: null,
+          payment_id: null,
+          created_at: null
+        };
+      }
+
+      res.json(userStatus);
+    } catch (err) {
+      console.error("Error fetching user status:", err);
+      res.status(500).json({ message: "Failed to fetch user status" });
+    }
+  });
+
   // Update Payment Settings (Admin only)
   app.patch("/api/admin/payment-settings", requireAdmin, async (req, res) => {
     try {

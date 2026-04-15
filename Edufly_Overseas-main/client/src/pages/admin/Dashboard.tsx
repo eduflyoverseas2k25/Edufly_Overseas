@@ -102,7 +102,7 @@ export default function Dashboard() {
             <span className="text-xl font-bold text-primary font-heading">Edufly Admin</span>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto"
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {tabs.map((tab) => (
             <Button 
               key={tab.id}

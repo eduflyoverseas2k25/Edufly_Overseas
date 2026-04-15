@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, Users, MapPin, GraduationCap, Image, MessageSquare, 
-  LogOut, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Loader2, Settings, Palette 
+  LogOut, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Loader2, Settings, Palette, DollarSign 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +19,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { LeadsManagement } from "@/components/admin/LeadsManagement";
+import { PaymentsManagement } from "@/components/admin/PaymentsManagement";
 import type { Lead, Destination, Program, DestinationPlace, GalleryItem, Testimonial, SiteSettings } from "@shared/schema";
 
-type Tab = "dashboard" | "leads" | "destinations" | "programs" | "places" | "gallery" | "testimonials" | "settings";
+type Tab = "dashboard" | "leads" | "payments" | "destinations" | "programs" | "places" | "gallery" | "testimonials" | "settings";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
@@ -78,6 +80,7 @@ export default function Dashboard() {
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "leads", label: "Leads", icon: Users },
+    { id: "payments", label: "Payments", icon: DollarSign },
     { id: "destinations", label: "Destinations", icon: MapPin },
     { id: "programs", label: "Programs", icon: GraduationCap },
     { id: "places", label: "Places", icon: Image },
@@ -133,7 +136,8 @@ export default function Dashboard() {
             programsCount={programs?.length || 0}
           />
         )}
-        {activeTab === "leads" && <LeadsPanel leads={leads || []} isLoading={leadsLoading} />}
+        {activeTab === "leads" && <LeadsManagement leads={leads || []} isLoading={leadsLoading} />}
+        {activeTab === "payments" && <PaymentsManagement />}
         {activeTab === "destinations" && <DestinationsPanel destinations={destinations || []} isLoading={destsLoading} />}
         {activeTab === "programs" && <ProgramsPanel programs={programs || []} isLoading={progsLoading} />}
         {activeTab === "places" && <PlacesPanel destinations={destinations || []} />}

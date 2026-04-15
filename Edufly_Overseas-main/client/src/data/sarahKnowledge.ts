@@ -14,11 +14,6 @@ export interface Program {
 
 export interface KnowledgeBase {
   programs: Program[];
-  destinations: Array<{
-    name: string;
-    description: string;
-    highlights: string[];
-  }>;
   contact: {
     phone: string;
     email: string;
@@ -34,15 +29,15 @@ export interface KnowledgeBase {
 export const sarahKnowledge: KnowledgeBase = {
   programs: [
     {
-      id: "nasa-trip",
-      name: "NASA Trip",
-      title: "NASA Space Center Experience - USA",
+      id: "nasa-stem-tour",
+      name: "NASA STEM Educational Tour",
+      title: "NASA STEM Educational Tour - USA",
       duration: "10 Days",
       eligibility: "Students Grade 8-12",
       price: 350000,
       currency: "INR",
       description: "An immersive journey to NASA Space Centers, Kennedy Space Center, and SpaceX facilities. Experience rocket launches, meet astronauts, and explore the future of space exploration.",
-      brochureUrl: "/brochures/nasa-trip-2026.pdf",
+      brochureUrl: "https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/u657utzs_USA%20STEM%20Programme.pdf",
       highlights: [
         "Visit NASA Kennedy Space Center",
         "Tour SpaceX Facilities",
@@ -59,48 +54,6 @@ export const sarahKnowledge: KnowledgeBase = {
         "Travel Insurance",
         "Tour Guide"
       ]
-    },
-    {
-      id: "uk-oxford-cambridge",
-      name: "UK Universities Tour",
-      title: "Oxford & Cambridge Universities - UK",
-      duration: "12 Days",
-      eligibility: "Students Grade 10-12",
-      price: 280000,
-      currency: "INR",
-      description: "Explore the prestigious universities of Oxford and Cambridge. Attend lectures, visit historic colleges, and experience British academic culture.",
-      highlights: [
-        "Oxford University Tour",
-        "Cambridge University Campus",
-        "British Museum Visit",
-        "Harry Potter Studio Tour",
-        "Interactive University Sessions"
-      ],
-      includes: [
-        "International Flights",
-        "Accommodation",
-        "All Meals",
-        "Entry Tickets",
-        "Travel Insurance"
-      ]
-    }
-  ],
-
-  destinations: [
-    {
-      name: "Singapore",
-      description: "Safe and innovative destination combining STEM experiences with culture and adventure.",
-      highlights: ["Gardens by the Bay", "Universal Studios", "Science Centre"]
-    },
-    {
-      name: "United States",
-      description: "Home to world-class universities and innovation hubs like Silicon Valley.",
-      highlights: ["MIT", "Harvard", "NASA", "Silicon Valley"]
-    },
-    {
-      name: "United Kingdom",
-      description: "Historic universities and centuries of academic tradition.",
-      highlights: ["Oxford", "Cambridge", "British Museum", "London"]
     }
   ],
 
@@ -122,11 +75,11 @@ export const sarahKnowledge: KnowledgeBase = {
     },
     {
       question: "What is the payment process?",
-      answer: "You can make payments online via Razorpay. We accept credit/debit cards, UPI, and net banking."
+      answer: "You can make payments online via Razorpay. We accept credit/debit cards, UPI, and net banking. Both full payment and part payment options are available."
     },
     {
-      question: "Can I get a refund if I cancel?",
-      answer: "Refund policies vary by program. Please contact us for specific cancellation terms."
+      question: "Can I pay in installments?",
+      answer: "Yes, we offer part payment options. You can secure your seat with a partial payment and complete the remaining amount later."
     },
     {
       question: "What safety measures do you have?",
@@ -138,7 +91,6 @@ export const sarahKnowledge: KnowledgeBase = {
 // Intent matching keywords
 export const intentKeywords = {
   nasa: ["nasa", "space", "rocket", "astronaut", "kennedy"],
-  uk: ["uk", "oxford", "cambridge", "england", "britain", "london"],
   price: ["price", "cost", "fee", "amount", "how much"],
   duration: ["duration", "days", "how long", "time"],
   eligibility: ["eligible", "age", "grade", "class", "who can"],

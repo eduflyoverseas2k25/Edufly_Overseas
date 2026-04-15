@@ -139,6 +139,159 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ===== RAZORPAY PAYMENT INTEGRATION =====
+  
+  const Razorpay = (await import('razorpay')).default;
+  const crypto = await import('crypto');
+  
+  const razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+  });
+
+  // Create Razorpay Order
+  app.post("/api/payment/create-order", async (req, res) => {
+    try {
+      const { name, phone, program, amount } = req.body;
+      
+      if (!name || !phone || !amount) {
+        return res.status(400).json({ message: "Name, phone, and amount are required" });
+      }
+
+      if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(500).json({ message: "Razorpay keys not configured" });
+      }
+
+      // Amount should be in paise (multiply by 100)
+      const amountInPaise = parseInt(amount) * 100;
+
+      const options = {
+        amount: amountInPaise,
+        currency: "INR",
+        receipt: `receipt_${Date.now()}`,
+        notes: {
+          name,
+          phone,
+          program: program || 'NASA'
+        }
+      };
+
+      const order = await razorpayInstance.orders.create(options);
+
+      // Save initial payment record
+      await pool.query(
+        `INSERT INTO payments (name, phone, program, amount, order_id, status) 
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [name, phone, program || 'NASA', amountInPaise, order.id, 'pending']
+      );
+
+      res.json({
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID
+      });
+    } catch (err) {
+      console.error("Error creating Razorpay order:", err);
+      res.status(500).json({ message: "Failed to create payment order" });
+    }
+  });
+
+  // Verify Razorpay Payment
+  app.post("/api/payment/verify", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({ message: "Missing payment verification data" });
+      }
+
+      // Verify signature
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || '')
+        .update(body.toString())
+        .digest("hex");
+
+      const isAuthentic = expectedSignature === razorpay_signature;
+
+      if (isAuthentic) {
+        // Update payment status to success
+        await pool.query(
+          `UPDATE payments 
+           SET payment_id = $1, signature = $2, status = $3 
+           WHERE order_id = $4`,
+          [razorpay_payment_id, razorpay_signature, 'success', razorpay_order_id]
+        );
+
+        // Get payment details
+        const result = await pool.query(
+          `SELECT * FROM payments WHERE order_id = $1`,
+          [razorpay_order_id]
+        );
+
+        res.json({ 
+          success: true, 
+          message: "Payment verified successfully",
+          payment: result.rows[0]
+        });
+      } else {
+        // Update payment status to failed
+        await pool.query(
+          `UPDATE payments SET status = $1 WHERE order_id = $2`,
+          ['failed', razorpay_order_id]
+        );
+
+        res.status(400).json({ 
+          success: false, 
+          message: "Payment verification failed" 
+        });
+      }
+    } catch (err) {
+      console.error("Error verifying payment:", err);
+      res.status(500).json({ message: "Payment verification failed" });
+    }
+  });
+
+  // Refund Payment (Admin only)
+  app.post("/api/payment/refund/:paymentId", requireAdmin, async (req, res) => {
+    try {
+      const { paymentId } = req.params;
+
+      // Get payment details
+      const result = await pool.query(
+        `SELECT * FROM payments WHERE payment_id = $1 AND status = 'success'`,
+        [paymentId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Payment not found or already refunded" });
+      }
+
+      const payment = result.rows[0];
+
+      // Process refund via Razorpay
+      const refund = await razorpayInstance.payments.refund(paymentId, {
+        amount: payment.amount
+      });
+
+      // Update payment status
+      await pool.query(
+        `UPDATE payments SET status = $1, refund_id = $2 WHERE payment_id = $3`,
+        ['refunded', refund.id, paymentId]
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Refund processed successfully",
+        refundId: refund.id
+      });
+    } catch (err) {
+      console.error("Error processing refund:", err);
+      res.status(500).json({ message: "Refund failed" });
+    }
+  });
+
   // ===== ADMIN AUTH =====
 
   // Initialize admin user with hashed password if not exists
@@ -198,27 +351,143 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "New password must be at least 8 characters long" });
       }
 
-      // Get current admin password (assuming username is 'admin')
-      const result = await pool.query('SELECT * FROM admins WHERE username = $1', ['admin']);
+      // Get current admin password
+      const result = await pool.query('SELECT password FROM admins WHERE username = $1', ['admin']);
       if (result.rows.length === 0) {
-        return res.status(404).json({ message: "Admin user not found" });
+        return res.status(404).json({ message: "Admin not found" });
       }
 
-      const admin = result.rows[0];
-      const isValid = await verifyPassword(currentPassword, admin.password);
-
+      const isValid = await verifyPassword(currentPassword, result.rows[0].password);
       if (!isValid) {
         return res.status(401).json({ message: "Current password is incorrect" });
       }
 
-      // Hash new password and update
-      const hashedNewPassword = await hashPassword(newPassword);
-      await pool.query('UPDATE admins SET password = $1 WHERE username = $2', [hashedNewPassword, 'admin']);
+      // Update with new password
+      const hashedPassword = await hashPassword(newPassword);
+      await pool.query('UPDATE admins SET password = $1 WHERE username = $2', [hashedPassword, 'admin']);
 
       res.json({ message: "Password changed successfully" });
     } catch (err) {
-      console.error("Change password error:", err);
+      console.error("Error changing password:", err);
       res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // ===== ADMIN: LEAD MANAGEMENT =====
+
+  // Get all leads
+  app.get("/api/admin/leads", requireAdmin, async (req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT * FROM leads ORDER BY created_at DESC`
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Error fetching leads:", err);
+      res.status(500).json({ message: "Failed to fetch leads" });
+    }
+  });
+
+  // Update lead status
+  app.patch("/api/admin/leads/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const validStatuses = ['new', 'contacted', 'partially_paid', 'fully_paid'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      await pool.query(
+        `UPDATE leads SET status = $1 WHERE id = $2`,
+        [status, id]
+      );
+
+      res.json({ success: true, message: "Lead status updated" });
+    } catch (err) {
+      console.error("Error updating lead:", err);
+      res.status(500).json({ message: "Failed to update lead" });
+    }
+  });
+
+  // Delete lead
+  app.delete("/api/admin/leads/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await pool.query(`DELETE FROM leads WHERE id = $1`, [id]);
+      res.json({ success: true, message: "Lead deleted" });
+    } catch (err) {
+      console.error("Error deleting lead:", err);
+      res.status(500).json({ message: "Failed to delete lead" });
+    }
+  });
+
+  // ===== ADMIN: PAYMENT MANAGEMENT =====
+
+  // Get all payments with optional filters
+  app.get("/api/admin/payments", requireAdmin, async (req, res) => {
+    try {
+      const { status, startDate, endDate } = req.query;
+
+      let query = `SELECT * FROM payments WHERE 1=1`;
+      const params: any[] = [];
+
+      if (status) {
+        params.push(status);
+        query += ` AND status = $${params.length}`;
+      }
+
+      if (startDate) {
+        params.push(startDate);
+        query += ` AND created_at >= $${params.length}`;
+      }
+
+      if (endDate) {
+        params.push(endDate);
+        query += ` AND created_at <= $${params.length}`;
+      }
+
+      query += ` ORDER BY created_at DESC`;
+
+      const result = await pool.query(query, params);
+
+      // Check for duplicate payments (same phone + successful payment)
+      const duplicates = await pool.query(`
+        SELECT phone, COUNT(*) as count 
+        FROM payments 
+        WHERE status = 'success' 
+        GROUP BY phone 
+        HAVING COUNT(*) > 1
+      `);
+
+      res.json({
+        payments: result.rows,
+        duplicatePhones: duplicates.rows.map(d => d.phone)
+      });
+    } catch (err) {
+      console.error("Error fetching payments:", err);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  // Get single payment details
+  app.get("/api/admin/payments/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await pool.query(
+        `SELECT * FROM payments WHERE id = $1`,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Error fetching payment:", err);
+      res.status(500).json({ message: "Failed to fetch payment" });
     }
   });
 

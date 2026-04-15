@@ -32,13 +32,24 @@ export async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS leads (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      email TEXT NOT NULL,
       phone TEXT NOT NULL,
-      purpose TEXT NOT NULL,
-      amount INTEGER,
+      grade TEXT,
+      program TEXT DEFAULT 'NASA',
+      status TEXT DEFAULT 'new',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      program TEXT NOT NULL DEFAULT 'NASA',
+      amount INTEGER NOT NULL,
+      payment_id TEXT,
+      order_id TEXT,
+      signature TEXT,
       status TEXT DEFAULT 'pending',
-      gateway TEXT,
-      transaction_id TEXT,
+      refund_id TEXT,
       created_at TIMESTAMP DEFAULT NOW()
     );
     

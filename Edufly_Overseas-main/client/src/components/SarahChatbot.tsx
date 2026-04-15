@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, MessageCircle, Download, ExternalLink } from "lucide-react";
+import { X, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { sarahKnowledge, type Program } from "@/data/sarahKnowledge";
+import { sarahKnowledge } from "@/data/sarahKnowledge";
 
 interface Message {
   id: string;
@@ -16,13 +16,25 @@ interface LeadData {
   studentName?: string;
   parentPhone?: string;
   studentGrade?: string;
-  program?: string;
+}
+
+interface PaymentData extends LeadData {
+  amount?: number;
+  paymentType?: 'full' | 'part';
+}
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
 }
 
 export function SarahChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasShownOnce, setHasShownOnce] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [leadData, setLeadData] = useState<LeadData>({});
+  const [paymentData, setPaymentData] = useState<PaymentData>({});
   const [currentFlow, setCurrentFlow] = useState<string>('main');
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,14 +47,33 @@ export function SarahChatbot() {
     scrollToBottom();
   }, [messages]);
 
+  // Show popup after 5 seconds (once only)
+  useEffect(() => {
+    if (!hasShownOnce) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        setHasShownOnce(true);
+        localStorage.setItem('sarahShown', 'true');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [hasShownOnce]);
+
+  useEffect(() => {
+    const shown = localStorage.getItem('sarahShown');
+    if (shown) {
+      setHasShownOnce(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage(
-        "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you explore programs, upcoming trips, and guide you through registration and payment.\n\nWhat would you like to do?",
+        "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, and payment.\n\nWhat would you like to do?",
         [
-          { label: "🚀 Explore Programs", action: "explore_programs" },
-          { label: "🛸 NASA Trip (Upcoming)", action: "nasa_trip" },
-          { label: "📝 Register Now", action: "register" },
+          { label: "🚀 View NASA Program", action: "nasa_trip" },
+          { label: "📝 Register Interest", action: "register" },
           { label: "💳 Make Payment", action: "payment" },
           { label: "💬 Talk on WhatsApp", action: "whatsapp" }
         ]
@@ -73,14 +104,8 @@ export function SarahChatbot() {
 
   const handleAction = (action: string, data?: any) => {
     switch (action) {
-      case 'explore_programs':
-        handleExplorePrograms();
-        break;
       case 'nasa_trip':
         handleNASATrip();
-        break;
-      case 'program_details':
-        handleProgramDetails(data);
         break;
       case 'register':
         handleRegisterStart();
@@ -95,10 +120,10 @@ export function SarahChatbot() {
         handleBackToMain();
         break;
       case 'download_brochure':
-        handleDownloadBrochure(data);
+        handleDownloadBrochure();
         break;
       case 'register_interest':
-        handleRegisterInterest(data);
+        handleRegisterInterest();
         break;
       case 'pay_now':
         handlePayNow(data);
@@ -108,62 +133,27 @@ export function SarahChatbot() {
     }
   };
 
-  const handleExplorePrograms = () => {
-    addUserMessage("Explore Programs");
-    const programsText = "Here are our available programs:\n\n" + 
-      sarahKnowledge.programs.map((p, i) => 
-        `${i + 1}. **${p.name}**\n   ${p.duration} | ${p.eligibility}\n   ₹${p.price.toLocaleString('en-IN')}`
-      ).join('\n\n');
-    
-    addBotMessage(
-      programsText,
-      sarahKnowledge.programs.map(p => ({
-        label: p.name,
-        action: 'program_details',
-        data: p
-      })).concat([{ label: "← Back to Main Menu", action: "back_to_main" }])
-    );
-  };
-
   const handleNASATrip = () => {
-    addUserMessage("NASA Trip (Upcoming)");
-    const nasa = sarahKnowledge.programs.find(p => p.id === 'nasa-trip');
-    if (nasa) {
-      const text = `🚀 **${nasa.title}**\n\n` +
-        `📅 **Duration:** ${nasa.duration}\n` +
-        `👨‍🎓 **Eligibility:** ${nasa.eligibility}\n` +
-        `💰 **Price:** ₹${nasa.price.toLocaleString('en-IN')}\n\n` +
-        `${nasa.description}\n\n` +
-        `**Highlights:**\n${nasa.highlights.map(h => `✓ ${h}`).join('\n')}`;
-      
-      addBotMessage(text, [
-        { label: "📄 Download Brochure", action: "download_brochure", data: nasa },
-        { label: "📝 Register Interest", action: "register_interest", data: nasa },
-        { label: "💳 Pay Now", action: "pay_now", data: nasa },
-        { label: "← Back", action: "back_to_main" }
-      ]);
-    }
-  };
-
-  const handleProgramDetails = (program: Program) => {
-    addUserMessage(program.name);
-    const text = `**${program.title}**\n\n` +
-      `📅 **Duration:** ${program.duration}\n` +
-      `👨‍🎓 **Eligibility:** ${program.eligibility}\n` +
-      `💰 **Price:** ₹${program.price.toLocaleString('en-IN')}\n\n` +
-      `${program.description}\n\n` +
-      `**What's Included:**\n${program.includes.map(i => `✓ ${i}`).join('\n')}`;
+    addUserMessage("View NASA Program");
+    const nasa = sarahKnowledge.programs[0];
+    
+    const text = `🚀 **${nasa.title}**\n\n` +
+      `📅 **Duration:** ${nasa.duration}\n` +
+      `👨‍🎓 **Eligibility:** ${nasa.eligibility}\n` +
+      `💰 **Price:** ₹${nasa.price.toLocaleString('en-IN')}\n\n` +
+      `${nasa.description}\n\n` +
+      `**Highlights:**\n${nasa.highlights.map(h => `✓ ${h}`).join('\n')}`;
     
     addBotMessage(text, [
-      { label: "📄 Download Brochure", action: "download_brochure", data: program },
-      { label: "📝 Register Interest", action: "register_interest", data: program },
-      { label: "💳 Pay Now", action: "pay_now", data: program },
-      { label: "← Back", action: "explore_programs" }
+      { label: "📄 Download Brochure", action: "download_brochure" },
+      { label: "📝 Register Interest", action: "register_interest" },
+      { label: "💳 Pay Now", action: "pay_now" },
+      { label: "← Back", action: "back_to_main" }
     ]);
   };
 
   const handleRegisterStart = () => {
-    addUserMessage("Register Now");
+    addUserMessage("Register Interest");
     setCurrentFlow('register_name');
     addBotMessage(
       "Great! Let me collect a few details.\n\nWhat is the **student's name**?",
@@ -171,12 +161,11 @@ export function SarahChatbot() {
     );
   };
 
-  const handleRegisterInterest = (program: Program) => {
+  const handleRegisterInterest = () => {
     addUserMessage("Register Interest");
-    setLeadData({ program: program.name });
     setCurrentFlow('register_name');
     addBotMessage(
-      `Perfect! Let's register your interest for **${program.name}**.\n\nWhat is the **student's name**?`,
+      "Perfect! Let's register your interest for the NASA STEM Educational Tour.\n\nWhat is the **student's name**?",
       []
     );
   };
@@ -184,28 +173,39 @@ export function SarahChatbot() {
   const handlePaymentStart = () => {
     addUserMessage("Make Payment");
     addBotMessage(
-      "Which program would you like to pay for?",
-      sarahKnowledge.programs.map(p => ({
-        label: `${p.name} - ₹${p.price.toLocaleString('en-IN')}`,
-        action: 'pay_now',
-        data: p
-      })).concat([{ label: "← Back", action: "back_to_main" }])
+      "You can make payment for the **NASA STEM Educational Tour** (₹3,50,000).\n\nChoose payment option:",
+      [
+        { label: "💳 Full Payment (₹3,50,000)", action: "pay_now", data: { type: 'full', amount: 350000 } },
+        { label: "💰 Part Payment", action: "pay_now", data: { type: 'part', amount: 0 } },
+        { label: "← Back", action: "back_to_main" }
+      ]
     );
   };
 
-  const handlePayNow = (program: Program) => {
-    addUserMessage(`Pay for ${program.name}`);
-    setLeadData({ program: program.name });
-    setCurrentFlow('payment_name');
-    addBotMessage(
-      `To proceed with payment for **${program.name}** (₹${program.price.toLocaleString('en-IN')}), please provide:\n\n**Student Name:**`,
-      []
-    );
+  const handlePayNow = (data: any) => {
+    const paymentType = data?.type || 'full';
+    addUserMessage(paymentType === 'full' ? 'Full Payment' : 'Part Payment');
+    
+    if (paymentType === 'part') {
+      setPaymentData({ paymentType: 'part' });
+      setCurrentFlow('payment_amount');
+      addBotMessage(
+        "Please enter the amount you want to pay now (minimum ₹50,000):",
+        []
+      );
+    } else {
+      setPaymentData({ paymentType: 'full', amount: 350000 });
+      setCurrentFlow('payment_name');
+      addBotMessage(
+        `To proceed with **full payment** of ₹3,50,000, please provide:\n\n**Student Name:**`,
+        []
+      );
+    }
   };
 
   const handleWhatsApp = () => {
     addUserMessage("Talk on WhatsApp");
-    const whatsappUrl = `https://wa.me/${sarahKnowledge.contact.whatsapp}?text=Hi, I'm interested in Edufly Overseas programs. Can you help me?`;
+    const whatsappUrl = `https://wa.me/${sarahKnowledge.contact.whatsapp}?text=Hi, I'm interested in the NASA STEM Educational Tour. Can you help me?`;
     window.open(whatsappUrl, '_blank');
     addBotMessage(
       "Opening WhatsApp... 💬\n\nOur team will be happy to assist you!",
@@ -213,22 +213,18 @@ export function SarahChatbot() {
     );
   };
 
-  const handleDownloadBrochure = (program: Program) => {
+  const handleDownloadBrochure = () => {
     addUserMessage("Download Brochure");
-    if (program.brochureUrl) {
-      window.open(program.brochureUrl, '_blank');
+    const brochureUrl = sarahKnowledge.programs[0].brochureUrl;
+    if (brochureUrl) {
+      window.open(brochureUrl, '_blank');
       addBotMessage(
         "Brochure is being downloaded... 📄\n\nWhat would you like to do next?",
         [
-          { label: "📝 Register Interest", action: "register_interest", data: program },
-          { label: "💳 Pay Now", action: "pay_now", data: program },
+          { label: "📝 Register Interest", action: "register_interest" },
+          { label: "💳 Pay Now", action: "pay_now" },
           { label: "← Back", action: "back_to_main" }
         ]
-      );
-    } else {
-      addBotMessage(
-        "Brochure will be available soon. Please contact us for more details.",
-        [{ label: "💬 Contact on WhatsApp", action: "whatsapp" }]
       );
     }
   };
@@ -236,12 +232,12 @@ export function SarahChatbot() {
   const handleBackToMain = () => {
     setCurrentFlow('main');
     setLeadData({});
+    setPaymentData({});
     addBotMessage(
       "What would you like to do?",
       [
-        { label: "🚀 Explore Programs", action: "explore_programs" },
-        { label: "🛸 NASA Trip (Upcoming)", action: "nasa_trip" },
-        { label: "📝 Register Now", action: "register" },
+        { label: "🚀 View NASA Program", action: "nasa_trip" },
+        { label: "📝 Register Interest", action: "register" },
         { label: "💳 Make Payment", action: "payment" },
         { label: "💬 Talk on WhatsApp", action: "whatsapp" }
       ]
@@ -255,25 +251,46 @@ export function SarahChatbot() {
     setInputValue('');
 
     // Handle text input based on current flow
-    if (currentFlow === 'register_name' || currentFlow === 'payment_name') {
+    if (currentFlow === 'register_name') {
       setLeadData(prev => ({ ...prev, studentName: text }));
-      setCurrentFlow(currentFlow === 'register_name' ? 'register_phone' : 'payment_phone');
+      setCurrentFlow('register_phone');
       addBotMessage("Great! Now, what is the **parent's phone number**?", []);
-    } else if (currentFlow === 'register_phone' || currentFlow === 'payment_phone') {
+    } else if (currentFlow === 'register_phone') {
       setLeadData(prev => ({ ...prev, parentPhone: text }));
-      setCurrentFlow(currentFlow === 'register_phone' ? 'register_grade' : 'payment_grade');
+      setCurrentFlow('register_grade');
       addBotMessage("Almost done! What is the **student's grade/class**?", []);
     } else if (currentFlow === 'register_grade') {
-      setLeadData(prev => ({ ...prev, studentGrade: text }));
-      await saveLeadAndRedirect({ ...leadData, studentGrade: text });
+      const finalLeadData = { ...leadData, studentGrade: text };
+      setLeadData(finalLeadData);
+      await saveLeadAndRedirect(finalLeadData);
+    } else if (currentFlow === 'payment_amount') {
+      const amount = parseInt(text.replace(/[^0-9]/g, ''));
+      if (amount < 50000) {
+        addBotMessage("Minimum part payment is ₹50,000. Please enter a valid amount:", []);
+        return;
+      }
+      setPaymentData(prev => ({ ...prev, amount }));
+      setCurrentFlow('payment_name');
+      addBotMessage(`Great! Proceeding with payment of ₹${amount.toLocaleString('en-IN')}.\n\n**Student Name:**`, []);
+    } else if (currentFlow === 'payment_name') {
+      setPaymentData(prev => ({ ...prev, studentName: text }));
+      setCurrentFlow('payment_phone');
+      addBotMessage("**Parent's phone number:**", []);
+    } else if (currentFlow === 'payment_phone') {
+      setPaymentData(prev => ({ ...prev, parentPhone: text }));
+      setCurrentFlow('payment_grade');
+      addBotMessage("**Student's grade/class:**", []);
     } else if (currentFlow === 'payment_grade') {
-      setLeadData(prev => ({ ...prev, studentGrade: text }));
-      await initiatePayment({ ...leadData, studentGrade: text });
+      const finalPaymentData = { ...paymentData, studentGrade: text };
+      setPaymentData(finalPaymentData);
+      await initiatePayment(finalPaymentData);
     }
   };
 
   const saveLeadAndRedirect = async (data: LeadData) => {
     try {
+      addBotMessage("Saving your details... ⏳", []);
+
       // Save lead to backend
       await fetch('/api/leads', {
         method: 'POST',
@@ -281,14 +298,14 @@ export function SarahChatbot() {
         body: JSON.stringify({
           name: data.studentName,
           phone: data.parentPhone,
-          purpose: `Interest in ${data.program || 'Programs'}`,
-          message: `Student Grade: ${data.studentGrade}`
+          grade: data.studentGrade,
+          program: 'NASA'
         })
       });
 
       // Redirect to WhatsApp
       const whatsappMessage = encodeURIComponent(
-        `Hi! I'm interested in Edufly programs.\n\nStudent Name: ${data.studentName}\nParent Phone: ${data.parentPhone}\nGrade: ${data.studentGrade}\nProgram: ${data.program || 'General Inquiry'}`
+        `Hi! I'm interested in the NASA STEM Educational Tour.\n\nStudent Name: ${data.studentName}\nParent Phone: ${data.parentPhone}\nGrade: ${data.studentGrade}`
       );
       const whatsappUrl = `https://wa.me/${sarahKnowledge.contact.whatsapp}?text=${whatsappMessage}`;
       
@@ -302,6 +319,7 @@ export function SarahChatbot() {
         handleBackToMain();
       }, 1500);
     } catch (error) {
+      console.error('Error saving lead:', error);
       addBotMessage(
         "Sorry, there was an error. Please try again or contact us directly.",
         [{ label: "💬 Contact on WhatsApp", action: "whatsapp" }]
@@ -309,12 +327,99 @@ export function SarahChatbot() {
     }
   };
 
-  const initiatePayment = async (data: LeadData) => {
-    addBotMessage(
-      `Processing payment for **${data.studentName}**...\n\n(Payment integration coming next)`,
-      [{ label: "← Back to Main Menu", action: "back_to_main" }]
-    );
-    // Payment logic will be added in next step
+  const initiatePayment = async (data: PaymentData) => {
+    try {
+      addBotMessage("Initiating payment... ⏳", []);
+
+      // Create Razorpay order
+      const response = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.studentName,
+          phone: data.parentPhone,
+          program: 'NASA',
+          amount: data.amount
+        })
+      });
+
+      const orderData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
+
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+
+      // Open Razorpay checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Edufly Overseas",
+        description: "NASA STEM Educational Tour",
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          // Verify payment
+          const verifyResponse = await fetch('/api/payment/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+
+          const verifyData = await verifyResponse.json();
+
+          if (verifyData.success) {
+            addBotMessage(
+              `✅ Payment successful!\n\nTransaction ID: ${response.razorpay_payment_id}\n\nYour seat for the NASA STEM Educational Tour has been confirmed. We'll contact you soon with further details.`,
+              [{ label: "← Back to Main Menu", action: "back_to_main" }]
+            );
+          } else {
+            addBotMessage(
+              "Payment verification failed. Please contact us for assistance.",
+              [{ label: "💬 Contact on WhatsApp", action: "whatsapp" }]
+            );
+          }
+        },
+        prefill: {
+          name: data.studentName,
+          contact: data.parentPhone
+        },
+        theme: {
+          color: "#ef6e2d"
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        addBotMessage(
+          "Payment failed. Please try again or contact us for assistance.",
+          [
+            { label: "Try Again", action: "payment" },
+            { label: "💬 Contact on WhatsApp", action: "whatsapp" }
+          ]
+        );
+      });
+      rzp.open();
+
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      addBotMessage(
+        "Sorry, there was an error initiating payment. Please contact us directly.",
+        [{ label: "💬 Contact on WhatsApp", action: "whatsapp" }]
+      );
+    }
   };
 
   return (
@@ -387,7 +492,7 @@ export function SarahChatbot() {
           </div>
 
           {/* Input */}
-          {(currentFlow.includes('register') || currentFlow.includes('payment')) && currentFlow !== 'main' && (
+          {currentFlow !== 'main' && !currentFlow.includes('back') && (
             <div className="p-4 border-t border-slate-200 bg-white">
               <div className="flex gap-2">
                 <Input

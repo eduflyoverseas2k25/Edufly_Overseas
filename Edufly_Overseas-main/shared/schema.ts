@@ -9,17 +9,29 @@ export const admins = pgTable("admins", {
   password: text("password").notNull(),
 });
 
-// Leads / Payments
+// Leads - Student inquiries and registrations
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
-  email: text("email").notNull(),
-  purpose: text("purpose").notNull(), // 'Counselling', 'Registration', etc.
-  amount: integer("amount"), // In cents or lowest unit, optional if just a lead
-  status: text("status").default("pending"), // 'pending', 'paid', 'failed'
-  gateway: text("gateway"), // 'razorpay'
-  transactionId: text("transaction_id"),
+  grade: text("grade"), // Student's grade/class
+  program: text("program").default("NASA"), // Program interested in
+  status: text("status").default("new"), // 'new', 'contacted', 'partially_paid', 'fully_paid'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Payments - Transaction records
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  program: text("program").notNull().default("NASA"),
+  amount: integer("amount").notNull(), // Amount in paise (INR lowest unit)
+  paymentId: text("payment_id"), // Razorpay payment ID
+  orderId: text("order_id"), // Razorpay order ID
+  signature: text("signature"), // Razorpay signature for verification
+  status: text("status").default("pending"), // 'pending', 'success', 'failed', 'refunded'
+  refundId: text("refund_id"), // Razorpay refund ID if refunded
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -125,7 +137,8 @@ export const siteSettings = pgTable("site_settings", {
 
 // Schemas
 export const insertAdminSchema = createInsertSchema(admins);
-export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true, transactionId: true, gateway: true, status: true });
+export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
+export const insertPaymentSchema = createInsertSchema(payments).omit({ id: true, createdAt: true });
 export const insertDestinationSchema = createInsertSchema(destinations).omit({ id: true });
 export const insertProgramSchema = createInsertSchema(programs).omit({ id: true });
 export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ id: true });
@@ -136,6 +149,7 @@ export const updateSiteSettingsSchema = createInsertSchema(siteSettings).omit({ 
 // Types
 export type Admin = typeof admins.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
+export type Payment = typeof payments.$inferSelect;
 export type Destination = typeof destinations.$inferSelect;
 export type Program = typeof programs.$inferSelect;
 export type Testimonial = typeof testimonials.$inferSelect;
@@ -144,6 +158,7 @@ export type DestinationPlace = typeof destinationPlaces.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
 
 export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type InsertDestination = z.infer<typeof insertDestinationSchema>;
 export type InsertProgram = z.infer<typeof insertProgramSchema>;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;

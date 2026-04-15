@@ -91,7 +91,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <aside className="w-64 bg-white border-r border-border hidden md:flex flex-col">
+      <aside className="w-64 bg-white border-r border-border flex flex-col">
         <div className="p-6 border-b border-border flex justify-center">
           <div className="flex items-center gap-3">
             <img 
@@ -102,7 +102,7 @@ export default function Dashboard() {
             <span className="text-xl font-bold text-primary font-heading">Edufly Admin</span>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto"
           {tabs.map((tab) => (
             <Button 
               key={tab.id}

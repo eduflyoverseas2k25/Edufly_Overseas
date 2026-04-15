@@ -164,16 +164,6 @@ export const sarahKnowledge: KnowledgeBase = {
     ]
   }
 };
-    {
-      question: "Can I pay in installments?",
-      answer: "Yes, we offer part payment options. You can secure your seat with a partial payment and complete the remaining amount later."
-    },
-    {
-      question: "What safety measures do you have?",
-      answer: "Safety is our top priority. We have 24/7 support, experienced guides, comprehensive insurance, and follow all safety protocols."
-    }
-  ]
-};
 
 // Intent matching keywords
 export const intentKeywords = {

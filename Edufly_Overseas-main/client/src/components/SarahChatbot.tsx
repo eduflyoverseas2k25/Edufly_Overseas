@@ -486,21 +486,40 @@ export function SarahChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="fixed bottom-32 right-6 z-50 bg-white rounded-2xl shadow-2xl p-4 max-w-[280px] border-2 border-primary/20"
+            className="fixed bottom-36 right-6 z-50 bg-white rounded-3xl shadow-2xl p-6 max-w-[320px] border-2 border-primary/20"
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-4">
               <motion.div 
-                className="w-12 h-12 flex-shrink-0"
+                className="w-20 h-20 flex-shrink-0 rounded-full overflow-hidden border-2 border-primary/30 shadow-lg relative"
                 animate={{ rotate: [0, 10, -10, 10, 0] }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <SarahAvatar />
+                <img 
+                  src="https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/i14u8lzk_d553736f-ced3-495f-a819-bd0a08dffd19.jpg"
+                  alt="Sarah Avatar"
+                  className="w-full h-full object-cover"
+                />
+                {/* Waving Hand Overlay */}
+                <motion.div
+                  className="absolute -bottom-1 -right-1 text-3xl"
+                  animate={{ 
+                    rotate: [0, 20, -20, 20, 0],
+                    scale: [1, 1.1, 1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 1.2,
+                    repeat: 2,
+                    ease: "easeInOut"
+                  }}
+                >
+                  👋
+                </motion.div>
               </motion.div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-base font-bold text-slate-900">
                   Hi 👋 I'm Sarah
                 </p>
-                <p className="text-xs text-slate-600 mt-1">
+                <p className="text-sm text-slate-600 mt-1">
                   May I help you?
                 </p>
               </div>
@@ -509,33 +528,39 @@ export function SarahChatbot() {
         )}
       </AnimatePresence>
 
-      {/* Floating Button */}
+      {/* Floating Button - BIGGER */}
       {!isOpen && (
         <motion.button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gradient-to-r from-primary to-secondary hover:shadow-2xl text-white px-5 py-3 rounded-full shadow-xl transition-all"
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-primary via-secondary to-primary hover:shadow-2xl text-white rounded-full shadow-xl transition-all group"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <motion.div 
-            className="w-10 h-10 bg-white rounded-full p-1.5 shadow-lg"
-            animate={{ 
-              y: [0, -4, 0],
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <SarahAvatar />
-          </motion.div>
-          <div className="text-left">
-            <span className="font-bold text-sm block">Chat with Sarah</span>
-            <span className="text-xs opacity-90">Your Edufly Assistant</span>
+          <div className="flex items-center gap-3 px-5 py-4">
+            <motion.div 
+              className="w-14 h-14 bg-white rounded-full p-1 shadow-lg overflow-hidden border-2 border-white"
+              animate={{ 
+                y: [0, -4, 0],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <img 
+                src="https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/i14u8lzk_d553736f-ced3-495f-a819-bd0a08dffd19.jpg"
+                alt="Sarah Avatar"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </motion.div>
+            <div className="text-left pr-2">
+              <span className="font-bold text-base block leading-tight">Chat with Sarah</span>
+              <span className="text-xs opacity-95 leading-tight">Your Edufly Assistant</span>
+            </div>
           </div>
         </motion.button>
       )}
@@ -553,7 +578,7 @@ export function SarahChatbot() {
           <div className="bg-gradient-to-r from-primary to-secondary p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div 
-                className="w-11 h-11 bg-white rounded-full p-1.5 shadow-lg flex-shrink-0"
+                className="w-14 h-14 bg-white rounded-full p-1 shadow-lg flex-shrink-0 overflow-hidden border-2 border-white"
                 animate={{ 
                   scale: [1, 1.05, 1],
                 }}
@@ -563,11 +588,18 @@ export function SarahChatbot() {
                   ease: "easeInOut"
                 }}
               >
-                <SarahAvatar />
+                <img 
+                  src="https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/i14u8lzk_d553736f-ced3-495f-a819-bd0a08dffd19.jpg"
+                  alt="Sarah Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </motion.div>
               <div>
-                <h3 className="font-bold text-white">Sarah</h3>
-                <p className="text-xs text-white/80">Edufly Assistant • Online</p>
+                <h3 className="font-bold text-white text-lg">Sarah</h3>
+                <p className="text-xs text-white/90 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  Edufly Assistant • Online
+                </p>
               </div>
             </div>
             <button

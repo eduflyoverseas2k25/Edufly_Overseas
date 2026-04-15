@@ -91,8 +91,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <aside className="w-64 bg-white border-r border-border flex flex-col">
-        <div className="p-6 border-b border-border flex justify-center">
+      {/* Admin Sidebar - Always Visible */}
+      <aside className="w-64 bg-white border-r-2 border-slate-200 flex flex-col shadow-lg">
+        <div className="p-6 border-b-2 border-slate-200 flex justify-center bg-slate-50">
           <div className="flex items-center gap-3">
             <img 
               src="/assets/logo.png" 
@@ -102,28 +103,36 @@ export default function Dashboard() {
             <span className="text-xl font-bold text-primary font-heading">Edufly Admin</span>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        
+        {/* Navigation Tabs */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {tabs.map((tab) => (
-            <Button 
+            <button
               key={tab.id}
-              variant={activeTab === tab.id ? "secondary" : "ghost"} 
-              className="w-full justify-start gap-2"
               onClick={() => setActiveTab(tab.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                activeTab === tab.id 
+                  ? 'bg-primary text-white shadow-md' 
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+              }`}
               data-testid={`button-tab-${tab.id}`}
             >
-              <tab.icon size={18} /> {tab.label}
-            </Button>
+              <tab.icon size={18} />
+              <span className="font-medium">{tab.label}</span>
+            </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-border">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+        
+        {/* Logout Button */}
+        <div className="p-4 border-t-2 border-slate-200 bg-slate-50">
+          <button
             onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left bg-red-50 text-red-600 hover:bg-red-100 transition-all"
             data-testid="button-logout"
           >
-            <LogOut size={18} /> Logout
-          </Button>
+            <LogOut size={18} />
+            <span className="font-medium">Logout</span>
+          </button>
         </div>
       </aside>
 

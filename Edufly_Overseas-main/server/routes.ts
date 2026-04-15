@@ -144,10 +144,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   const Razorpay = (await import('razorpay')).default;
   const crypto = await import('crypto');
   
-  const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || '',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
-  });
+  // Initialize Razorpay only if keys are provided
+  let razorpayInstance: any = null;
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+  }
+
+  // Helper to check if Razorpay is configured
+  const isRazorpayConfigured = () => {
+    return !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+  };
 
   // Create Razorpay Order
   app.post("/api/payment/create-order", async (req, res) => {
@@ -158,8 +167,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ message: "Name, phone, and amount are required" });
       }
 
-      if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-        return res.status(500).json({ message: "Razorpay keys not configured" });
+      if (!isRazorpayConfigured() || !razorpayInstance) {
+        return res.status(500).json({ 
+          message: "Payment system not configured. Please contact administrator to set up Razorpay keys." 
+        });
       }
 
       // Amount should be in paise (multiply by 100)
@@ -257,6 +268,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/payment/refund/:paymentId", requireAdmin, async (req, res) => {
     try {
       const { paymentId } = req.params;
+
+      if (!isRazorpayConfigured() || !razorpayInstance) {
+        return res.status(500).json({ 
+          message: "Payment system not configured. Cannot process refund." 
+        });
+      }
 
       // Get payment details
       const result = await pool.query(

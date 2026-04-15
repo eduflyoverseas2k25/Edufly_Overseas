@@ -52,8 +52,8 @@ Please help me plan my educational tour. Thank you!`;
   return (
     <div className={`bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-border/50 ${className}`}>
       <div className="mb-6">
-        <h3 className="text-2xl font-bold font-heading text-foreground">Plan Your Educational Tour</h3>
-        <p className="text-muted-foreground mt-2">Fill out the form below and our travel experts will help you plan the perfect tour.</p>
+        <h3 className="text-2xl font-bold font-heading text-slate-900">Plan Your Educational Tour</h3>
+        <p className="text-slate-700 mt-2">Fill out the form below and our travel experts will help you plan the perfect tour.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -122,8 +122,8 @@ Please help me plan my educational tour. Thank you!`;
         </Button>
       </form>
       
-      <div className="mt-4 text-center text-sm text-muted-foreground">
-        <p>Or call us directly at <strong className="text-foreground">{settings?.contactPhone || "+91 90945 50551"}</strong></p>
+      <div className="mt-4 text-center text-sm text-slate-700">
+        <p>Or call us directly at <strong className="text-slate-900">{settings?.contactPhone || "+91 90945 50551"}</strong></p>
       </div>
     </div>
   );

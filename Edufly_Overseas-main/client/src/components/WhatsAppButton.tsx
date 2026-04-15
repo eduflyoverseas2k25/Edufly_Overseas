@@ -1,9 +1,17 @@
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 
 export function WhatsAppButton() {
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"]
+  });
+
+  const whatsappNumber = settings?.whatsappNumber || "919094550551";
+  
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Hi, I'm interested in the NASA Educational Tour");
-    window.open(`https://wa.me/919094550551?text=${message}`, '_blank');
+    window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
   };
 
   return (

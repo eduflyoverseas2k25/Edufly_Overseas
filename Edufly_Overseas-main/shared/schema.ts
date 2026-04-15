@@ -117,6 +117,8 @@ export const siteSettings = pgTable("site_settings", {
   contactPhone: text("contact_phone").default("+91 98765 43210"),
   contactEmail: text("contact_email").default("info@eduflyoverseas.com"),
   contactAddress: text("contact_address").default("Chennai, Tamil Nadu, India"),
+  whatsappNumber: text("whatsapp_number").default("+91 90945 50551"),
+  workingHours: text("working_hours").default("Monday - Saturday: 10:00 AM - 7:00 PM\nSunday: Closed"),
   // Footer
   footerTagline: text("footer_tagline").default("Your trusted partner for international education."),
   // About

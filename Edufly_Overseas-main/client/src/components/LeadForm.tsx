@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 
 type LeadFormProps = {
   className?: string;
@@ -6,9 +8,15 @@ type LeadFormProps = {
 };
 
 export function LeadForm({ className }: LeadFormProps) {
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"]
+  });
+
+  const whatsappNumber = settings?.whatsappNumber || "919094550551";
+  
   const handleWhatsAppContact = () => {
     const message = encodeURIComponent("Hi! I want to plan an Educational Tour. Can you help me?");
-    window.open(`https://wa.me/919094550551?text=${message}`, '_blank');
+    window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
   };
 
   return (
@@ -59,7 +67,7 @@ export function LeadForm({ className }: LeadFormProps) {
         </div>
 
         <div className="text-center text-sm text-muted-foreground">
-          <p>Or call us directly at <strong className="text-foreground">+91 90945 50551</strong></p>
+          <p>Or call us directly at <strong className="text-foreground">{settings?.contactPhone || "+91 90945 50551"}</strong></p>
         </div>
       </div>
     </div>

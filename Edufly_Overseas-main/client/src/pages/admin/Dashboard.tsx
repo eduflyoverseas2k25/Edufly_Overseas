@@ -1620,9 +1620,22 @@ function SettingsPanel() {
             <Input 
               value={currentSettings.contactPhone || ""} 
               onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-              placeholder="+91 98765 43210"
+              placeholder="+91 90945 50551"
               data-testid="input-contact-phone"
             />
+          </div>
+          
+          <div>
+            <Label>WhatsApp Number</Label>
+            <Input 
+              value={currentSettings.whatsappNumber || ""} 
+              onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
+              placeholder="+91 90945 50551"
+              data-testid="input-whatsapp-number"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              This number is used for the WhatsApp floating button and contact forms
+            </p>
           </div>
           
           <div>
@@ -1630,7 +1643,7 @@ function SettingsPanel() {
             <Input 
               value={currentSettings.contactEmail || ""} 
               onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-              placeholder="info@eduflyoverseas.com"
+              placeholder="eduflyoverseasindia@gmail.com"
               data-testid="input-contact-email"
             />
           </div>
@@ -1641,8 +1654,19 @@ function SettingsPanel() {
               value={currentSettings.contactAddress || ""} 
               onChange={(e) => setFormData({ ...formData, contactAddress: e.target.value })}
               placeholder="Chennai, Tamil Nadu, India"
-              rows={2}
+              rows={3}
               data-testid="input-contact-address"
+            />
+          </div>
+          
+          <div>
+            <Label>Working Hours</Label>
+            <Textarea 
+              value={currentSettings.workingHours || ""} 
+              onChange={(e) => setFormData({ ...formData, workingHours: e.target.value })}
+              placeholder="Monday - Saturday: 10:00 AM - 7:00 PM&#10;Sunday: Closed"
+              rows={2}
+              data-testid="input-working-hours"
             />
           </div>
         </div>

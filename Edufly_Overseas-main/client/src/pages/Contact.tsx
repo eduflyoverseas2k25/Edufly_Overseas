@@ -2,8 +2,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { LeadForm } from "@/components/LeadForm";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 
 export default function Contact() {
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"]
+  });
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -32,7 +38,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Our Office</h3>
-                    <p className="text-slate-600">123 Education Plaza, Knowledge Park,<br/>Mumbai, India - 400001</p>
+                    <p className="text-slate-600 whitespace-pre-line">{settings?.contactAddress || "Chennai, Tamil Nadu, India"}</p>
                   </div>
                 </div>
 
@@ -42,8 +48,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Phone</h3>
-                    <p className="text-slate-600">+91 98765 43210</p>
-                    <p className="text-slate-600">+91 12345 67890</p>
+                    <p className="text-slate-600">{settings?.contactPhone || "+91 90945 50551"}</p>
                   </div>
                 </div>
 
@@ -53,8 +58,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Email</h3>
-                    <p className="text-slate-600">info@eduflyoverseas.com</p>
-                    <p className="text-slate-600">admissions@eduflyoverseas.com</p>
+                    <p className="text-slate-600">{settings?.contactEmail || "eduflyoverseasindia@gmail.com"}</p>
                   </div>
                 </div>
 
@@ -64,8 +68,9 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Working Hours</h3>
-                    <p className="text-slate-600">Monday - Saturday: 10:00 AM - 7:00 PM</p>
-                    <p className="text-slate-600">Sunday: Closed</p>
+                    <p className="text-slate-600 whitespace-pre-line">
+                      {settings?.workingHours || "Monday - Saturday: 10:00 AM - 7:00 PM\nSunday: Closed"}
+                    </p>
                   </div>
                 </div>
               </div>

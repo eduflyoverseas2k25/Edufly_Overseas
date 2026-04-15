@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send, MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sarahKnowledge } from "@/data/sarahKnowledge";
+import { SarahAvatar } from "@/components/SarahAvatar";
 
 interface Message {
   id: string;
@@ -32,6 +34,7 @@ declare global {
 export function SarahChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasShownOnce, setHasShownOnce] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [leadData, setLeadData] = useState<LeadData>({});
   const [paymentData, setPaymentData] = useState<PaymentData>({});
@@ -47,34 +50,52 @@ export function SarahChatbot() {
     scrollToBottom();
   }, [messages]);
 
-  // Show popup after 5 seconds (once only)
+  // Show greeting animation after 5-8 seconds (once only)
   useEffect(() => {
-    if (!hasShownOnce) {
+    const greetingShown = localStorage.getItem('sarahGreetingShown');
+    if (!greetingShown) {
       const timer = setTimeout(() => {
-        setIsOpen(true);
-        setHasShownOnce(true);
-        localStorage.setItem('sarahShown', 'true');
-      }, 5000);
+        setShowGreeting(true);
+        localStorage.setItem('sarahGreetingShown', 'true');
+        
+        // Hide greeting after 3 seconds
+        setTimeout(() => {
+          setShowGreeting(false);
+        }, 3000);
+      }, 6000); // 6 seconds delay
 
       return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Show popup after 5 seconds (once only) - separate from greeting
+  useEffect(() => {
+    if (!hasShownOnce) {
+      const shown = localStorage.getItem('sarahShown');
+      if (!shown) {
+        const timer = setTimeout(() => {
+          setIsOpen(true);
+          setHasShownOnce(true);
+          localStorage.setItem('sarahShown', 'true');
+        }, 5000);
+
+        return () => clearTimeout(timer);
+      } else {
+        setHasShownOnce(true);
+      }
     }
   }, [hasShownOnce]);
 
   useEffect(() => {
-    const shown = localStorage.getItem('sarahShown');
-    if (shown) {
-      setHasShownOnce(true);
-    }
-  }, []);
-
-  useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage(
-        "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, and payment.\n\nWhat would you like to do?",
+        "Hi 👋 I'm Sarah, your Edufly Assistant.\n\nI can help you with the NASA program, registration, payment, and answer questions about our destinations and services.\n\nWhat would you like to do?",
         [
           { label: "🚀 View NASA Program", action: "nasa_trip" },
+          { label: "🌍 Explore Destinations", action: "destinations" },
           { label: "📝 Register Interest", action: "register" },
           { label: "💳 Make Payment", action: "payment" },
+          { label: "ℹ️ About Edufly", action: "about" },
           { label: "💬 Talk on WhatsApp", action: "whatsapp" }
         ]
       );
@@ -107,6 +128,12 @@ export function SarahChatbot() {
       case 'nasa_trip':
         handleNASATrip();
         break;
+      case 'destinations':
+        handleDestinations();
+        break;
+      case 'about':
+        handleAbout();
+        break;
       case 'register':
         handleRegisterStart();
         break;
@@ -131,6 +158,31 @@ export function SarahChatbot() {
       default:
         break;
     }
+  };
+
+  const handleDestinations = () => {
+    addUserMessage("Explore Destinations");
+    const text = "🌍 **Our Destinations:**\n\n" +
+      sarahKnowledge.destinations.map((dest, i) => `${i + 1}. ${dest}`).join('\n') +
+      "\n\nWe offer customized educational tours to all these destinations with unique learning experiences at each location.";
+    
+    addBotMessage(text, [
+      { label: "🚀 View NASA Program", action: "nasa_trip" },
+      { label: "📝 Register Interest", action: "register" },
+      { label: "← Back", action: "back_to_main" }
+    ]);
+  };
+
+  const handleAbout = () => {
+    addUserMessage("About Edufly");
+    const text = `**About Edufly Overseas**\n\n${sarahKnowledge.aboutUs}\n\n**Why Choose Us:**\n` +
+      sarahKnowledge.whyChooseUs.map(reason => `✓ ${reason}`).join('\n');
+    
+    addBotMessage(text, [
+      { label: "🚀 View NASA Program", action: "nasa_trip" },
+      { label: "📞 Contact Us", action: "whatsapp" },
+      { label: "← Back", action: "back_to_main" }
+    ]);
   };
 
   const handleNASATrip = () => {
@@ -237,8 +289,10 @@ export function SarahChatbot() {
       "What would you like to do?",
       [
         { label: "🚀 View NASA Program", action: "nasa_trip" },
+        { label: "🌍 Explore Destinations", action: "destinations" },
         { label: "📝 Register Interest", action: "register" },
         { label: "💳 Make Payment", action: "payment" },
+        { label: "ℹ️ About Edufly", action: "about" },
         { label: "💬 Talk on WhatsApp", action: "whatsapp" }
       ]
     );
@@ -424,29 +478,96 @@ export function SarahChatbot() {
 
   return (
     <>
+      {/* Greeting Popup Animation */}
+      <AnimatePresence>
+        {showGreeting && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed bottom-32 right-6 z-50 bg-white rounded-2xl shadow-2xl p-4 max-w-[280px] border-2 border-primary/20"
+          >
+            <div className="flex items-start gap-3">
+              <motion.div 
+                className="w-12 h-12 flex-shrink-0"
+                animate={{ rotate: [0, 10, -10, 10, 0] }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <SarahAvatar />
+              </motion.div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-900">
+                  Hi 👋 I'm Sarah
+                </p>
+                <p className="text-xs text-slate-600 mt-1">
+                  May I help you?
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Floating Button */}
       {!isOpen && (
-        <button
+        <motion.button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-4 rounded-full shadow-2xl transition-all hover:scale-105"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gradient-to-r from-primary to-secondary hover:shadow-2xl text-white px-5 py-3 rounded-full shadow-xl transition-all"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
         >
-          <MessageCircle className="w-6 h-6" />
-          <span className="font-bold">Chat with Sarah</span>
-        </button>
+          <motion.div 
+            className="w-10 h-10 bg-white rounded-full p-1.5 shadow-lg"
+            animate={{ 
+              y: [0, -4, 0],
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <SarahAvatar />
+          </motion.div>
+          <div className="text-left">
+            <span className="font-bold text-sm block">Chat with Sarah</span>
+            <span className="text-xs opacity-90">Your Edufly Assistant</span>
+          </div>
+        </motion.button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[95vw] max-w-[420px] h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200">
+        <motion.div 
+          className="fixed bottom-6 right-6 z-50 w-[95vw] max-w-[420px] h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-secondary p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
-                S
-              </div>
+              <motion.div 
+                className="w-11 h-11 bg-white rounded-full p-1.5 shadow-lg flex-shrink-0"
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <SarahAvatar />
+              </motion.div>
               <div>
                 <h3 className="font-bold text-white">Sarah</h3>
-                <p className="text-xs text-white/80">Edufly Assistant</p>
+                <p className="text-xs text-white/80">Edufly Assistant • Online</p>
               </div>
             </div>
             <button
@@ -460,8 +581,11 @@ export function SarahChatbot() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
             {messages.map((message) => (
-              <div
+              <motion.div
                 key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
@@ -475,18 +599,20 @@ export function SarahChatbot() {
                   {message.buttons && message.buttons.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {message.buttons.map((button, index) => (
-                        <button
+                        <motion.button
                           key={index}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           onClick={() => handleAction(button.action, button.data)}
                           className="w-full text-left text-sm px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors font-medium"
                         >
                           {button.label}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -512,7 +638,7 @@ export function SarahChatbot() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </>
   );

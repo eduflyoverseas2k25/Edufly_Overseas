@@ -163,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="section-padding">
+      <section className="section-padding overflow-hidden">
         <div className="container-custom">
           <motion.div 
             className="text-center max-w-3xl mx-auto mb-16"
@@ -176,70 +176,87 @@ export default function Home() {
             <p className="text-lg text-slate-700">We bring decades of experience organizing educational tours that combine learning, culture, and adventure.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { 
-                icon: Globe, 
-                title: "11 Global Destinations", 
-                desc: "Carefully curated tours across Asia, Europe, Americas, and Australia.",
-                gradient: "from-blue-500 to-cyan-500",
-                bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
-                iconBg: "bg-blue-100",
-                iconColor: "text-blue-600"
-              },
-              { 
-                icon: Users, 
-                title: "Expert Tour Planners", 
-                desc: "Experienced travel coordinators who craft the perfect educational journey.",
-                gradient: "from-orange-500 to-pink-500",
-                bgColor: "bg-gradient-to-br from-orange-50 to-pink-50",
-                iconBg: "bg-orange-100",
-                iconColor: "text-orange-600"
-              },
-              { 
-                icon: CheckCircle, 
-                title: "Complete Tour Management", 
-                desc: "From travel arrangements to accommodations, we handle every detail.",
-                gradient: "from-green-500 to-emerald-500",
-                bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
-                iconBg: "bg-green-100",
-                iconColor: "text-green-600"
-              }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ 
-                  opacity: 0, 
-                  x: i % 2 === 0 ? -100 : 100 
-                }}
-                whileInView={{ 
-                  opacity: 1, 
-                  x: 0 
-                }}
-                viewport={{ once: true }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: i * 0.3,
-                  type: "spring",
-                  bounce: 0.4
-                }}
-                whileHover={{ y: -10, scale: 1.03 }}
-                className={`${item.bgColor} p-8 rounded-2xl border-2 border-transparent hover:border-white shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group`}
-              >
-                {/* Gradient overlay on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-                
-                <motion.div 
-                  className={`w-14 h-14 ${item.iconBg} rounded-xl flex items-center justify-center ${item.iconColor} mb-6 relative z-10`}
-                  whileHover={{ rotate: 360, scale: 1.15 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <item.icon size={32} />
-                </motion.div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900 relative z-10">{item.title}</h3>
-                <p className="text-slate-700 leading-relaxed relative z-10">{item.desc}</p>
-              </motion.div>
-            ))}
+          {/* Infinite scrolling row */}
+          <div className="relative">
+            <motion.div 
+              className="flex gap-8"
+              animate={{
+                x: [0, -1200],
+              }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 20,
+                  ease: "linear",
+                },
+              }}
+            >
+              {/* Duplicate cards for seamless loop */}
+              {[...Array(3)].map((_, setIndex) => (
+                <div key={setIndex} className="flex gap-8 shrink-0">
+                  {[
+                    { 
+                      icon: Globe, 
+                      title: "11 Global Destinations", 
+                      desc: "Carefully curated tours across Asia, Europe, Americas, and Australia.",
+                      gradient: "from-violet-600 via-purple-600 to-fuchsia-600",
+                      bgColor: "bg-gradient-to-br from-violet-100 via-purple-100 to-fuchsia-100",
+                      iconBg: "bg-gradient-to-br from-violet-500 to-fuchsia-500",
+                      borderColor: "border-violet-300"
+                    },
+                    { 
+                      icon: Users, 
+                      title: "Expert Tour Planners", 
+                      desc: "Experienced travel coordinators who craft the perfect educational journey.",
+                      gradient: "from-orange-600 via-red-600 to-pink-600",
+                      bgColor: "bg-gradient-to-br from-orange-100 via-red-100 to-pink-100",
+                      iconBg: "bg-gradient-to-br from-orange-500 to-pink-500",
+                      borderColor: "border-orange-300"
+                    },
+                    { 
+                      icon: CheckCircle, 
+                      title: "Complete Tour Management", 
+                      desc: "From travel arrangements to accommodations, we handle every detail.",
+                      gradient: "from-emerald-600 via-teal-600 to-cyan-600",
+                      bgColor: "bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100",
+                      iconBg: "bg-gradient-to-br from-emerald-500 to-cyan-500",
+                      borderColor: "border-emerald-300"
+                    }
+                  ].map((item, i) => (
+                    <motion.div 
+                      key={`${setIndex}-${i}`}
+                      whileHover={{ scale: 1.05, y: -10 }}
+                      className={`${item.bgColor} w-[400px] p-8 rounded-2xl border-2 ${item.borderColor} shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group cursor-pointer shrink-0`}
+                    >
+                      {/* Animated gradient overlay */}
+                      <motion.div 
+                        className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-20`}
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 5, 0]
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatType: "reverse"
+                        }}
+                      />
+                      
+                      <motion.div 
+                        className={`w-16 h-16 ${item.iconBg} rounded-2xl flex items-center justify-center text-white mb-6 relative z-10 shadow-lg`}
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <item.icon size={36} strokeWidth={2.5} />
+                      </motion.div>
+                      <h3 className="text-xl font-bold mb-3 text-slate-900 relative z-10">{item.title}</h3>
+                      <p className="text-slate-700 leading-relaxed relative z-10">{item.desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
@@ -295,7 +312,7 @@ export default function Home() {
       </section>
 
       {/* Programs Section */}
-      <section className="section-padding">
+      <section className="section-padding overflow-hidden bg-gradient-to-b from-slate-50 to-white">
         <div className="container-custom">
           <motion.div 
             className="text-center max-w-3xl mx-auto mb-16"
@@ -308,56 +325,100 @@ export default function Home() {
             <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              { name: "Culture", gradient: "from-purple-500 to-pink-500", bg: "from-purple-50 to-pink-50", iconBg: "bg-purple-100", iconColor: "text-purple-600" },
-              { name: "History", gradient: "from-amber-500 to-orange-500", bg: "from-amber-50 to-orange-50", iconBg: "bg-amber-100", iconColor: "text-amber-600" },
-              { name: "Adventure", gradient: "from-red-500 to-rose-500", bg: "from-red-50 to-rose-50", iconBg: "bg-red-100", iconColor: "text-red-600" },
-              { name: "Art & Museums", gradient: "from-indigo-500 to-blue-500", bg: "from-indigo-50 to-blue-50", iconBg: "bg-indigo-100", iconColor: "text-indigo-600" },
-              { name: "Nature", gradient: "from-green-500 to-teal-500", bg: "from-green-50 to-teal-50", iconBg: "bg-green-100", iconColor: "text-green-600" },
-              { name: "Local Life", gradient: "from-cyan-500 to-sky-500", bg: "from-cyan-50 to-sky-50", iconBg: "bg-cyan-100", iconColor: "text-cyan-600" }
-            ].map((cat, i) => (
-              <motion.div 
-                key={cat.name} 
-                initial={{ 
-                  opacity: 0, 
-                  x: i % 2 === 0 ? -80 : 80,
-                  rotate: i % 2 === 0 ? -10 : 10
-                }}
-                whileInView={{ 
-                  opacity: 1, 
-                  x: 0,
-                  rotate: 0
-                }}
-                viewport={{ once: true }}
-                transition={{ 
-                  duration: 0.7, 
-                  delay: i * 0.15,
-                  type: "spring",
-                  bounce: 0.5
-                }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  y: -8,
-                  rotate: 5
-                }}
-                whileTap={{ scale: 0.95 }}
-                className={`bg-gradient-to-br ${cat.bg} p-6 rounded-xl border-2 border-transparent hover:border-white text-center shadow-md hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden`}
-              >
-                {/* Gradient overlay on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
-                
-                <motion.div 
-                  className={`w-12 h-12 mx-auto ${cat.iconBg} rounded-full flex items-center justify-center ${cat.iconColor} mb-4 relative z-10`}
-                  whileHover={{ rotate: [0, -15, 15, -15, 15, 0] }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <GraduationCap size={24} />
-                </motion.div>
-                <h3 className="font-bold text-sm md:text-base text-slate-900 relative z-10">{cat.name}</h3>
-              </motion.div>
+          {/* Infinite scrolling row - scrolls RIGHT to LEFT */}
+          <motion.div 
+            className="flex gap-6 mb-6"
+            animate={{
+              x: [-1800, 0],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 25,
+                ease: "linear",
+              },
+            }}
+          >
+            {/* Duplicate cards for seamless loop */}
+            {[...Array(4)].map((_, setIndex) => (
+              <div key={setIndex} className="flex gap-6 shrink-0">
+                {[
+                  { name: "Culture", gradient: "from-purple-600 via-fuchsia-600 to-pink-600", bg: "from-purple-100 to-pink-100", iconBg: "from-purple-600 to-pink-600", border: "border-purple-400" },
+                  { name: "History", gradient: "from-yellow-600 via-orange-600 to-red-600", bg: "from-yellow-100 to-red-100", iconBg: "from-yellow-600 to-red-600", border: "border-yellow-400" },
+                  { name: "Adventure", gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" }
+                ].map((cat) => (
+                  <motion.div 
+                    key={`${setIndex}-${cat.name}`}
+                    whileHover={{ scale: 1.12, y: -10, rotate: 5 }}
+                    className={`bg-gradient-to-br ${cat.bg} w-[200px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden shrink-0`}
+                  >
+                    <motion.div 
+                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-10 group-hover:opacity-30`}
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    
+                    <motion.div 
+                      className={`w-14 h-14 mx-auto bg-gradient-to-br ${cat.iconBg} rounded-full flex items-center justify-center text-white mb-4 relative z-10 shadow-lg`}
+                      whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <GraduationCap size={28} strokeWidth={2.5} />
+                    </motion.div>
+                    <h3 className="font-bold text-base text-slate-900 relative z-10">{cat.name}</h3>
+                  </motion.div>
+                ))}
+              </div>
             ))}
-          </div>
+          </motion.div>
+
+          {/* Second row - scrolls LEFT to RIGHT */}
+          <motion.div 
+            className="flex gap-6"
+            animate={{
+              x: [0, -1800],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 25,
+                ease: "linear",
+              },
+            }}
+          >
+            {[...Array(4)].map((_, setIndex) => (
+              <div key={setIndex} className="flex gap-6 shrink-0">
+                {[
+                  { name: "Art & Museums", gradient: "from-indigo-600 via-blue-600 to-cyan-600", bg: "from-indigo-100 to-cyan-100", iconBg: "from-indigo-600 to-cyan-600", border: "border-indigo-400" },
+                  { name: "Nature", gradient: "from-green-600 via-emerald-600 to-teal-600", bg: "from-green-100 to-teal-100", iconBg: "from-green-600 to-teal-600", border: "border-green-400" },
+                  { name: "Local Life", gradient: "from-sky-600 via-blue-600 to-indigo-600", bg: "from-sky-100 to-indigo-100", iconBg: "from-sky-600 to-indigo-600", border: "border-sky-400" }
+                ].map((cat) => (
+                  <motion.div 
+                    key={`${setIndex}-${cat.name}`}
+                    whileHover={{ scale: 1.12, y: -10, rotate: -5 }}
+                    className={`bg-gradient-to-br ${cat.bg} w-[200px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden shrink-0`}
+                  >
+                    <motion.div 
+                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-10 group-hover:opacity-30`}
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    
+                    <motion.div 
+                      className={`w-14 h-14 mx-auto bg-gradient-to-br ${cat.iconBg} rounded-full flex items-center justify-center text-white mb-4 relative z-10 shadow-lg`}
+                      whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <GraduationCap size={28} strokeWidth={2.5} />
+                    </motion.div>
+                    <h3 className="font-bold text-base text-slate-900 relative z-10">{cat.name}</h3>
+                  </motion.div>
+                ))}
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 

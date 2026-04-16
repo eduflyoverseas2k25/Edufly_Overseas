@@ -168,7 +168,7 @@ function DashboardOverview({ leadsCount, pendingCount, destinationsCount, progra
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
-          <h3 className="text-muted-foreground text-sm font-medium uppercase">Total Leads</h3>
+          <h3 className="text-slate-700 text-sm font-bold uppercase">Total Leads</h3>
           <p className="text-3xl font-bold text-slate-900 mt-2" data-testid="text-total-leads">{leadsCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
@@ -176,11 +176,11 @@ function DashboardOverview({ leadsCount, pendingCount, destinationsCount, progra
           <p className="text-3xl font-bold text-primary mt-2" data-testid="text-pending-leads">{pendingCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
-          <h3 className="text-muted-foreground text-sm font-medium uppercase">Destinations</h3>
+          <h3 className="text-slate-700 text-sm font-bold uppercase">Destinations</h3>
           <p className="text-3xl font-bold text-blue-600 mt-2" data-testid="text-destinations">{destinationsCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
-          <h3 className="text-muted-foreground text-sm font-medium uppercase">Programs</h3>
+          <h3 className="text-slate-700 text-sm font-bold uppercase">Programs</h3>
           <p className="text-3xl font-bold text-green-600 mt-2" data-testid="text-programs">{programsCount}</p>
         </div>
       </div>
@@ -221,7 +221,7 @@ function LeadsPanel({ leads, isLoading }: { leads: Lead[]; isLoading: boolean })
       <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
@@ -426,7 +426,7 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
       <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Slug</th>
@@ -610,7 +610,7 @@ function ProgramsPanel({ programs, isLoading }: { programs: Program[]; isLoading
       <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Title</th>
                 <th className="px-6 py-4">Category</th>
@@ -828,7 +828,7 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
         <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Image</th>
                   <th className="px-6 py-4">Name</th>

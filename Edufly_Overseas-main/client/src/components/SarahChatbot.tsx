@@ -377,7 +377,7 @@ export function SarahChatbot() {
     addBotMessage(text, [
       { label: "📄 Download Brochure", action: "download_brochure" },
       { label: "📝 Register Interest", action: "register_interest" },
-      { label: "💳 Pay Now", action: "pay_now" },
+      { label: "💳 Make Payment", action: "payment" },
       { label: "← Back", action: "back_to_main" }
     ]);
   };

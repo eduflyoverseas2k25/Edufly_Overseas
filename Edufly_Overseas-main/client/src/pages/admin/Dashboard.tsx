@@ -704,6 +704,8 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
   const [editPlace, setEditPlace] = useState<DestinationPlace | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({ 
     name: "", 
     slug: "",
@@ -764,16 +766,19 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
     }
   });
 
-  const resetForm = () => setFormData({ 
-    name: "", 
-    slug: "",
-    shortDescription: "",
-    description: "", 
-    culture: "",
-    history: "",
-    imageUrl: "", 
-    galleryImages: "" 
-  });
+  const resetForm = () => {
+    setFormData({ 
+      name: "", 
+      slug: "",
+      shortDescription: "",
+      description: "", 
+      culture: "",
+      history: "",
+      imageUrl: "", 
+      galleryImages: "" 
+    });
+    setSelectedFile(null);
+  };
 
   const openEdit = (place: DestinationPlace) => {
     setEditPlace(place);
@@ -789,13 +794,69 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
     });
   };
 
-  const handleSave = () => {
-    const galleryImages = formData.galleryImages.split("\n").map(s => s.trim()).filter(Boolean);
-    const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    if (editPlace) {
-      updateMutation.mutate({ id: editPlace.id, data: { ...formData, slug, galleryImages } });
-    } else if (selectedDest) {
-      createMutation.mutate({ destinationId: selectedDest, ...formData, slug, galleryImages });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({ title: "Only PNG, JPEG, and JPG files are allowed", variant: "destructive" });
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: "File size must be less than 10MB", variant: "destructive" });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const token = localStorage.getItem('admin_token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/admin/upload/place', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
+  const handleSave = async () => {
+    try {
+      setUploading(true);
+      let imageUrl = formData.imageUrl;
+
+      if (selectedFile) {
+        imageUrl = await uploadFile(selectedFile);
+      }
+
+      const galleryImages = formData.galleryImages.split("\n").map(s => s.trim()).filter(Boolean);
+      const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      if (editPlace) {
+        await updateMutation.mutateAsync({ id: editPlace.id, data: { ...formData, imageUrl, slug, galleryImages } });
+      } else if (selectedDest) {
+        await createMutation.mutateAsync({ destinationId: selectedDest, ...formData, imageUrl, slug, galleryImages });
+      }
+      
+      setSelectedFile(null);
+    } catch (error) {
+      toast({ title: "Failed to save place", variant: "destructive" });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -845,7 +906,7 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
                       <td className="px-6 py-4">
                         <img src={place.imageUrl || ""} alt={place.name} className="w-16 h-12 object-cover rounded" />
                       </td>
-                      <td className="px-6 py-4 font-medium">{place.name}</td>
+                      <td className="px-6 py-4 font-bold text-slate-900">{place.name}</td>
                       <td className="px-6 py-4 text-slate-600 truncate max-w-xs">{place.description}</td>
                       <td className="px-6 py-4 flex gap-2">
                         <Button size="icon" variant="ghost" onClick={() => openEdit(place)} data-testid={`button-edit-place-${place.id}`}>
@@ -899,8 +960,39 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
               <Textarea value={formData.history} onChange={(e) => setFormData({ ...formData, history: e.target.value })} rows={4} data-testid="input-place-history" placeholder="Historical background, founding story, key events..." />
             </div>
             <div>
-              <Label>Main Image URL *</Label>
-              <Input value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} data-testid="input-place-image" placeholder="https://images.unsplash.com/..." />
+              <Label>Main Image *</Label>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input 
+                    type="file" 
+                    accept="image/png,image/jpeg,image/jpg"
+                    onChange={handleFileChange}
+                    className="flex-1"
+                  />
+                  {selectedFile && (
+                    <div className="px-3 py-2 bg-green-50 text-green-700 rounded text-sm font-medium border border-green-200">
+                      ✓ {selectedFile.name}
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-slate-600">Or paste URL</span>
+                  </div>
+                </div>
+                <Input 
+                  value={formData.imageUrl} 
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} 
+                  data-testid="input-place-image" 
+                  placeholder="https://images.unsplash.com/..." 
+                />
+                <p className="text-xs text-slate-600">
+                  Upload PNG/JPEG/JPG (max 10MB) or paste an image URL
+                </p>
+              </div>
             </div>
             <div>
               <Label>Gallery Images (one URL per line)</Label>
@@ -908,14 +1000,14 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsAdding(false); setEditPlace(null); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setIsAdding(false); setEditPlace(null); resetForm(); }}>Cancel</Button>
             <Button 
               onClick={handleSave}
-              disabled={createMutation.isPending || updateMutation.isPending}
+              disabled={uploading || createMutation.isPending || updateMutation.isPending}
               data-testid="button-save-place"
             >
-              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {editPlace ? "Update" : "Create"}
+              {(uploading || createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {uploading ? "Uploading..." : editPlace ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>

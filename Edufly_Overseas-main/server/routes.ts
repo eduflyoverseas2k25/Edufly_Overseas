@@ -752,6 +752,35 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // Upload place image
+  app.post("/api/admin/upload/place", requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Validate file type and size
+      if (!validateFileType(req.file, 'image')) {
+        return res.status(400).json({ message: "Only PNG, JPEG, and JPG files are allowed" });
+      }
+      if (!validateFileSize(req.file, 10)) {
+        return res.status(400).json({ message: "File size must be less than 10MB" });
+      }
+
+      // Upload to S3
+      const fileUrl = await uploadToS3(req.file, 'places');
+      
+      res.json({ 
+        message: "File uploaded successfully", 
+        url: fileUrl,
+        filename: req.file.originalname 
+      });
+    } catch (err) {
+      console.error("Upload error:", err);
+      res.status(500).json({ message: "Failed to upload file" });
+    }
+  });
+
   // Upload gallery video
   app.post("/api/admin/upload/video", requireAdmin, uploadVideo.single('file'), async (req, res) => {
     try {

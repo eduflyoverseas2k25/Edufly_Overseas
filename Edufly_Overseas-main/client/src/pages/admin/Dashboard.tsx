@@ -264,7 +264,7 @@ function LeadsPanel({ leads, isLoading }: { leads: Lead[]; isLoading: boolean })
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No leads found</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-slate-600">No leads found</td></tr>
               )}
             </tbody>
           </table>
@@ -456,7 +456,7 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No destinations found</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center text-slate-600">No destinations found</td></tr>
               )}
             </tbody>
           </table>
@@ -638,7 +638,7 @@ function ProgramsPanel({ programs, isLoading }: { programs: Program[]; isLoading
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">No programs found</td></tr>
+                <tr><td colSpan={4} className="p-8 text-center text-slate-600">No programs found</td></tr>
               )}
             </tbody>
           </table>
@@ -858,7 +858,7 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">No places found for this destination</td></tr>
+                  <tr><td colSpan={4} className="p-8 text-center text-slate-600">No places found for this destination</td></tr>
                 )}
               </tbody>
             </table>
@@ -1079,7 +1079,7 @@ function GalleryPanel({ items, isLoading }: { items: GalleryItem[]; isLoading: b
             </div>
           ))
         ) : (
-          <div className="col-span-4 text-center text-muted-foreground p-8">No gallery items found</div>
+          <div className="col-span-4 text-center text-slate-600 p-8">No gallery items found</div>
         )}
       </div>
 
@@ -1310,14 +1310,14 @@ function TestimonialsPanel({ testimonials, isLoading }: { testimonials: Testimon
                 <img src={t.imageUrl || ""} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
                 <div>
                   <p className="font-bold">{t.name}</p>
-                  <p className="text-sm text-muted-foreground">{t.role}</p>
+                  <p className="text-sm text-slate-700">{t.role}</p>
                 </div>
               </div>
               <p className="text-slate-600">{t.content}</p>
             </div>
           ))
         ) : (
-          <div className="col-span-2 text-center text-muted-foreground p-8">No testimonials found</div>
+          <div className="col-span-2 text-center text-slate-600 p-8">No testimonials found</div>
         )}
       </div>
 
@@ -1453,7 +1453,7 @@ function SettingsPanel() {
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold font-heading text-slate-900">Brand & Theme Settings</h2>
-          <p className="text-muted-foreground">Switch between Dark and Light mode for the hero section</p>
+          <p className="text-slate-700">Switch between Dark and Light mode for the hero section</p>
         </div>
         <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(formData).length === 0} data-testid="button-save-settings">
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -1642,7 +1642,7 @@ function SettingsPanel() {
               placeholder="+91 90945 50551"
               data-testid="input-whatsapp-number"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               This number is used for the WhatsApp floating button and contact forms
             </p>
           </div>
@@ -1834,7 +1834,7 @@ function SettingsPanel() {
               placeholder="410000"
               data-testid="input-payment-full-amount"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               This is the full payment amount for the NASA program. Part payment will be 1/3 of this amount.
             </p>
           </div>
@@ -1842,7 +1842,7 @@ function SettingsPanel() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Enable Part Payment Option</Label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-600">
                 When enabled, users can choose to pay 1/3 of the full amount
               </p>
             </div>

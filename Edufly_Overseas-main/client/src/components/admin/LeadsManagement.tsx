@@ -79,7 +79,7 @@ export function LeadsManagement({ leads, isLoading }: LeadsManagementProps) {
       <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Phone</th>
@@ -175,7 +175,7 @@ export function LeadsManagement({ leads, isLoading }: LeadsManagementProps) {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No leads found</td></tr>
+                <tr><td colSpan={7} className="p-8 text-center text-slate-600">No leads found</td></tr>
               )}
             </tbody>
           </table>

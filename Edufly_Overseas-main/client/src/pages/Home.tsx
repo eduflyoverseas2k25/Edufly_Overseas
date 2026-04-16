@@ -165,10 +165,16 @@ export default function Home() {
       {/* Why Choose Us */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.div 
+            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Why Choose Edufly?</h2>
             <p className="text-lg text-slate-700">We bring decades of experience organizing educational tours that combine learning, culture, and adventure.</p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -178,12 +184,20 @@ export default function Home() {
             ].map((item, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ y: -5 }}
-                className="bg-white p-8 rounded-2xl border border-border/50 shadow-sm hover:shadow-lg transition-all"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                whileHover={{ y: -10, scale: 1.03 }}
+                className="bg-white p-8 rounded-2xl border border-border/50 shadow-sm hover:shadow-2xl transition-shadow"
               >
-                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
+                <motion.div 
+                  className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6"
+                  whileHover={{ rotate: 360, scale: 1.15 }}
+                  transition={{ duration: 0.6 }}
+                >
                   <item.icon size={32} />
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold mb-3 text-slate-900">{item.title}</h3>
                 <p className="text-slate-700 leading-relaxed">{item.desc}</p>
               </motion.div>
@@ -245,19 +259,38 @@ export default function Home() {
       {/* Programs Section */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.div 
+            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Tour Experiences</h2>
             <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {["Culture", "History", "Adventure", "Art & Museums", "Nature", "Local Life"].map((cat) => (
-              <div key={cat} className="bg-white p-6 rounded-xl border border-border/50 text-center hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group">
-                <div className="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-600 mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+            {["Culture", "History", "Adventure", "Art & Museums", "Nature", "Local Life"].map((cat, i) => (
+              <motion.div 
+                key={cat} 
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                whileHover={{ scale: 1.08, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white p-6 rounded-xl border border-border/50 text-center hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer group"
+              >
+                <motion.div 
+                  className="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-600 mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors"
+                  whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                  transition={{ duration: 0.5 }}
+                >
                   <GraduationCap size={24} />
-                </div>
+                </motion.div>
                 <h3 className="font-bold text-sm md:text-base text-slate-900">{cat}</h3>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

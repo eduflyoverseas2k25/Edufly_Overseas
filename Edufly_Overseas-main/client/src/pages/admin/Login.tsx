@@ -39,7 +39,7 @@ export default function AdminLogin() {
             />
           </div>
           <h1 className="text-2xl font-bold font-heading mt-4">Admin Login</h1>
-          <p className="text-muted-foreground">Edufly Overseas Dashboard</p>
+          <p className="text-slate-700">Edufly Overseas Dashboard</p>
         </div>
 
         <Form {...form}>

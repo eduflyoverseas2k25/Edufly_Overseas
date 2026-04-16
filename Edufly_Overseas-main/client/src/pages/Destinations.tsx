@@ -47,7 +47,7 @@ export default function Destinations() {
                   
                   <div className="p-6">
                     <h3 className="text-2xl font-bold font-heading mb-3">{dest.name}</h3>
-                    <p className="text-muted-foreground line-clamp-3 mb-6">
+                    <p className="text-slate-700 line-clamp-3 mb-6">
                       {dest.overview}
                     </p>
                     
@@ -71,7 +71,7 @@ export default function Destinations() {
 
               {destinations?.length === 0 && (
                 <div className="col-span-full text-center py-20">
-                  <p className="text-lg text-muted-foreground">No destinations found.</p>
+                  <p className="text-lg text-slate-700">No destinations found.</p>
                 </div>
               )}
             </div>

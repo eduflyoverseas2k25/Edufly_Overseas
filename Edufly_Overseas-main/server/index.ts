@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { runMigrations } from "./migrate";
 
 const app = express();
 const httpServer = createServer(app);
@@ -60,6 +61,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Run database migrations
+  try {
+    await runMigrations();
+    log("Database migrations completed");
+  } catch (error) {
+    log(`Migration error: ${error}`, "migration");
+    // Continue even if migrations fail (table might not exist yet)
+  }
+  
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

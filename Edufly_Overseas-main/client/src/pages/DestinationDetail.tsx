@@ -74,7 +74,7 @@ export default function DestinationDetail() {
       </div>
 
       <div className="container-custom py-12">
-        <Link href="/destinations" className="inline-flex items-center text-muted-foreground hover:text-primary mb-8">
+        <Link href="/destinations" className="inline-flex items-center text-slate-700 hover:text-primary mb-8">
           <ArrowLeft size={16} className="mr-2" /> Back to Destinations
         </Link>
 
@@ -84,7 +84,7 @@ export default function DestinationDetail() {
             {/* Overview with Read More */}
             <div>
               <h2 className="text-3xl font-bold font-heading mb-6" data-testid="heading-overview">Overview</h2>
-              <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-overview">
+              <p className="text-lg text-slate-700 leading-relaxed whitespace-pre-line" data-testid="text-overview">
                 {displayOverview}
               </p>
               {shouldTruncate && (
@@ -125,7 +125,7 @@ export default function DestinationDetail() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        <p className="text-sm text-slate-700 line-clamp-2 mb-4">
                           {place.shortDescription || place.description}
                         </p>
                         {place.slug ? (
@@ -150,7 +150,7 @@ export default function DestinationDetail() {
             {dest.sightseeing && (
               <div>
                 <h2 className="text-2xl font-bold font-heading mb-4" data-testid="heading-culture">Life & Culture</h2>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-culture">
+                <p className="text-slate-700 leading-relaxed whitespace-pre-line" data-testid="text-culture">
                   {dest.sightseeing.length > 300 && !isCultureExpanded 
                     ? dest.sightseeing.slice(0, 300) + "..." 
                     : dest.sightseeing}

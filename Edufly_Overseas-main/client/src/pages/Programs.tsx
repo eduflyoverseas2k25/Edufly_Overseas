@@ -207,7 +207,7 @@ export default function Programs() {
                 >
                   💬 Register Your Interest
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-sm text-slate-600">
                   Contact: +91 90945 50551 | eduflyoverseasindia@gmail.com
                 </p>
               </div>

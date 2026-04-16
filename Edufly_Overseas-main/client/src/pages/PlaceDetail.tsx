@@ -81,7 +81,7 @@ export default function PlaceDetail() {
       </div>
 
       <div className="container-custom py-12">
-        <Link href={`/destinations/${destSlug}`} className="inline-flex items-center text-muted-foreground hover:text-primary mb-8">
+        <Link href={`/destinations/${destSlug}`} className="inline-flex items-center text-slate-700 hover:text-primary mb-8">
           <ArrowLeft size={16} className="mr-2" /> Back to {destination.name}
         </Link>
 
@@ -95,7 +95,7 @@ export default function PlaceDetail() {
                   <BookOpen className="text-primary" size={24} />
                   About {place.name}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed text-lg whitespace-pre-line" data-testid="text-description">
+                <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line" data-testid="text-description">
                   {place.description}
                 </p>
               </div>
@@ -110,7 +110,7 @@ export default function PlaceDetail() {
                   </span>
                   Culture & Significance
                 </h2>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-culture">
+                <p className="text-slate-700 leading-relaxed whitespace-pre-line" data-testid="text-culture">
                   {place.culture}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export default function PlaceDetail() {
                   </span>
                   History
                 </h2>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line" data-testid="text-history">
+                <p className="text-slate-700 leading-relaxed whitespace-pre-line" data-testid="text-history">
                   {place.history}
                 </p>
               </div>

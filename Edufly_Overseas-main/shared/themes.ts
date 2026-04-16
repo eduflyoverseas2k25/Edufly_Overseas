@@ -46,9 +46,10 @@ export const themePresets: ThemePreset[] = [
     },
     hero: {
       style: "light",
-      gradientFrom: "#fbbf24",  // Amber
-      gradientVia: "#f59e0b",   // Orange
-      gradientTo: "#ef4444",    // Red
+      gradientFrom: "#fbbf24",  // Gold/Yellow
+      gradientVia: "#ec4899",   // Pink/Magenta
+      gradientTo: "#06b6d4",    // Cyan/Turquoise
+      overlayColor: "rgba(255, 255, 255, 0.1)", // Light overlay for text readability
     },
   },
 ];

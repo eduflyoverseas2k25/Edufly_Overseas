@@ -1476,7 +1476,7 @@ function SettingsPanel() {
               }`}
               data-testid={`button-theme-${theme.key}`}
             >
-              <div className={`w-12 h-12 mx-auto rounded-full mb-3 ${theme.key === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500'}`} />
+              <div className={`w-12 h-12 mx-auto rounded-full mb-3 ${theme.key === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-br from-yellow-400 via-pink-500 to-cyan-500'}`} />
               <div className="font-bold text-lg text-slate-900">{theme.label}</div>
               {settings?.themeKey === theme.key && (
                 <div className="text-xs text-primary font-medium mt-1">Active</div>

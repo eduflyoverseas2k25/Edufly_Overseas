@@ -909,11 +909,23 @@ function PlacesPanel({ destinations }: { destinations: Destination[] }) {
                       <td className="px-6 py-4 font-bold text-slate-900">{place.name}</td>
                       <td className="px-6 py-4 text-slate-600 truncate max-w-xs">{place.description}</td>
                       <td className="px-6 py-4 flex gap-2">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(place)} data-testid={`button-edit-place-${place.id}`}>
-                          <Pencil size={16} />
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          onClick={() => openEdit(place)} 
+                          data-testid={`button-edit-place-${place.id}`}
+                          className="border-slate-300 hover:bg-slate-100"
+                        >
+                          <Pencil size={16} className="text-slate-700" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => setDeleteId(place.id)} data-testid={`button-delete-place-${place.id}`}>
-                          <Trash2 size={16} className="text-destructive" />
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          onClick={() => setDeleteId(place.id)} 
+                          data-testid={`button-delete-place-${place.id}`}
+                          className="border-red-300 hover:bg-red-50"
+                        >
+                          <Trash2 size={16} className="text-red-600" />
                         </Button>
                       </td>
                     </tr>

@@ -441,7 +441,7 @@ function DestinationsPanel({ destinations, isLoading }: { destinations: Destinat
               ) : destinations.length > 0 ? (
                 destinations.map((dest) => (
                   <tr key={dest.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 font-medium">{dest.name}</td>
+                    <td className="px-6 py-4 font-bold text-slate-900">{dest.name}</td>
                     <td className="px-6 py-4 text-slate-600">{dest.slug}</td>
                     <td className="px-6 py-4 text-slate-600">{dest.duration}</td>
                     <td className="px-6 py-4 text-slate-600">{dest.language}</td>
@@ -1453,7 +1453,7 @@ function SettingsPanel() {
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold font-heading text-slate-900">Brand & Theme Settings</h2>
-          <p className="text-slate-700">Switch between Dark and Light mode for the hero section</p>
+          <p className="text-slate-700">Switch between Dark and Multi Color mode for the hero section</p>
         </div>
         <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(formData).length === 0} data-testid="button-save-settings">
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -1462,7 +1462,7 @@ function SettingsPanel() {
       </div>
 
       <div className="mb-8">
-        <h3 className="font-bold text-lg mb-4">Theme Mode</h3>
+        <h3 className="font-bold text-lg text-slate-900 mb-4">Theme Mode</h3>
         <div className="flex gap-4">
           {themePresets.map((theme) => (
             <button
@@ -1476,8 +1476,8 @@ function SettingsPanel() {
               }`}
               data-testid={`button-theme-${theme.key}`}
             >
-              <div className={`w-12 h-12 mx-auto rounded-full mb-3 ${theme.key === 'dark' ? 'bg-slate-800' : 'bg-amber-100'}`} />
-              <div className="font-bold text-lg">{theme.label}</div>
+              <div className={`w-12 h-12 mx-auto rounded-full mb-3 ${theme.key === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500'}`} />
+              <div className="font-bold text-lg text-slate-900">{theme.label}</div>
               {settings?.themeKey === theme.key && (
                 <div className="text-xs text-primary font-medium mt-1">Active</div>
               )}
@@ -1488,7 +1488,7 @@ function SettingsPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
-          <h3 className="font-bold text-lg border-b pb-2">Manual Color Customization</h3>
+          <h3 className="font-bold text-lg text-slate-900 border-b pb-2">Manual Color Customization</h3>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -1566,7 +1566,7 @@ function SettingsPanel() {
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
-          <h3 className="font-bold text-lg border-b pb-2">Hero Section Content</h3>
+          <h3 className="font-bold text-lg text-slate-900 border-b pb-2">Hero Section Content</h3>
           
           <div>
             <Label>Badge Text</Label>
@@ -1622,7 +1622,7 @@ function SettingsPanel() {
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
-          <h3 className="font-bold text-lg border-b pb-2">Contact Information</h3>
+          <h3 className="font-bold text-lg text-slate-900 border-b pb-2">Contact Information</h3>
           
           <div>
             <Label>Phone Number</Label>
@@ -1681,7 +1681,7 @@ function SettingsPanel() {
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
-          <h3 className="font-bold text-lg border-b pb-2">Footer & About</h3>
+          <h3 className="font-bold text-lg text-slate-900 border-b pb-2">Footer & About</h3>
           
           <div>
             <Label>Footer Tagline</Label>
@@ -1760,7 +1760,7 @@ function SettingsPanel() {
 
       {/* About Page Content */}
       <div className="mt-8 bg-white p-6 rounded-xl border border-border shadow-sm">
-        <h3 className="font-bold text-lg border-b pb-4 mb-6">About Page Content</h3>
+        <h3 className="font-bold text-lg text-slate-900 border-b pb-4 mb-6">About Page Content</h3>
         <div className="space-y-4">
           <div>
             <Label>Mission Statement</Label>

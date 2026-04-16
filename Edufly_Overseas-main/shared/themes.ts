@@ -36,19 +36,19 @@ export const themePresets: ThemePreset[] = [
     },
   },
   {
-    key: "light",
-    label: "Light",
+    key: "multicolor",
+    label: "Multi Color",
     colors: {
-      primary: "#ef6e2d",
-      secondary: "#fdc22c",
-      accent: "#178ab6",
+      primary: "#ef6e2d",      // Orange
+      secondary: "#fdc22c",    // Yellow
+      accent: "#178ab6",       // Blue
       text: "#1e293b",
     },
     hero: {
       style: "light",
-      gradientFrom: "#fff7ed",
-      gradientVia: "#fef3c7",
-      gradientTo: "#ffedd5",
+      gradientFrom: "#fbbf24",  // Amber
+      gradientVia: "#f59e0b",   // Orange
+      gradientTo: "#ef4444",    // Red
     },
   },
 ];

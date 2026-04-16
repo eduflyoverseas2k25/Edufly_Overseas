@@ -34,17 +34,25 @@ export function Header() {
     <header 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
-        scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-border/40 py-2" : "bg-transparent py-4 text-white"
+        scrolled 
+          ? "bg-white/95 backdrop-blur-md shadow-sm border-border/40 py-2" 
+          : "bg-transparent py-4"
       )}
     >
       <div className="container-custom flex items-center justify-between">
         <Link href="/">
-          <div className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-3 cursor-pointer">
             <img 
               src="/assets/logo.png" 
               alt="Edufly Overseas" 
-              className="h-12 w-12 object-cover rounded-full shadow-lg ring-2 ring-white"
+              className="h-12 w-12 object-cover rounded-full shadow-lg ring-2 ring-white/50"
             />
+            <span className={cn(
+              "text-xl font-bold font-heading transition-colors",
+              scrolled ? "text-primary" : "text-white"
+            )}>
+              Edufly Overseas
+            </span>
           </div>
         </Link>
 
@@ -57,10 +65,8 @@ export function Header() {
                 location === item.href 
                   ? "text-secondary" 
                   : scrolled 
-                    ? "text-foreground" 
-                    : isDark 
-                      ? "text-primary" 
-                      : "text-slate-700"
+                    ? "text-slate-900" 
+                    : "text-white"
               )}>
                 {item.label}
               </span>
@@ -85,9 +91,9 @@ export function Header() {
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? (
-            <X className={cn("w-6 h-6", scrolled ? "text-foreground" : isDark ? "text-primary" : "text-slate-700")} />
+            <X className={cn("w-6 h-6", scrolled ? "text-slate-900" : "text-white")} />
           ) : (
-            <Menu className={cn("w-6 h-6", scrolled ? "text-foreground" : isDark ? "text-primary" : "text-slate-700")} />
+            <Menu className={cn("w-6 h-6", scrolled ? "text-slate-900" : "text-white")} />
           )}
         </button>
       </div>

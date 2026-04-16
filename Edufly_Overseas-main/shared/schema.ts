@@ -95,17 +95,17 @@ export const destinationPlaces = pgTable("destination_places", {
 export const siteSettings = pgTable("site_settings", {
   id: serial("id").primaryKey(),
   // Theme Selection
-  themeKey: text("theme_key").default("summer"), // 'summer', 'winter', 'autumn', 'spring', 'rainy', 'tropical', 'sunset', 'ocean'
+  themeKey: text("theme_key").default("dark"), // 'dark' or 'multicolor'
   // Theme Colors (hex format)
   primaryColor: text("primary_color").default("#ef6e2d"),
   secondaryColor: text("secondary_color").default("#fdc22c"),
   accentColor: text("accent_color").default("#178ab6"),
   textColor: text("text_color").default("#1e293b"),
   // Hero Section
-  heroStyle: text("hero_style").default("light"), // 'light' or 'dark'
-  heroGradientFrom: text("hero_gradient_from").default("#fff7ed"),
-  heroGradientVia: text("hero_gradient_via").default("#fef3c7"),
-  heroGradientTo: text("hero_gradient_to").default("#ffedd5"),
+  heroStyle: text("hero_style").default("dark"), // 'light' or 'dark'
+  heroGradientFrom: text("hero_gradient_from").default("#1e293b"),
+  heroGradientVia: text("hero_gradient_via").default("#334155"),
+  heroGradientTo: text("hero_gradient_to").default("#475569"),
   heroImageUrl: text("hero_image_url"),
   heroOverlayColor: text("hero_overlay_color"),
   heroHeadline: text("hero_headline").default("Start Here. Go Anywhere."),

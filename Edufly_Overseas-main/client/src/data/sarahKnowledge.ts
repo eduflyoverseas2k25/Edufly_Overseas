@@ -42,7 +42,7 @@ export const sarahKnowledge: KnowledgeBase = {
       title: "NASA STEM Educational Tour - USA",
       duration: "10 Days",
       eligibility: "Students Grade 8-12",
-      price: 350000,
+      price: 410000,
       currency: "INR",
       description: "An immersive journey to NASA Space Centers, Kennedy Space Center, and SpaceX facilities. Experience rocket launches, meet astronauts, and explore the future of space exploration.",
       brochureUrl: "https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/u657utzs_USA%20STEM%20Programme.pdf",

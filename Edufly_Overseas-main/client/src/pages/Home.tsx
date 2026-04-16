@@ -178,28 +178,66 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Globe, title: "11 Global Destinations", desc: "Carefully curated tours across Asia, Europe, Americas, and Australia." },
-              { icon: Users, title: "Expert Tour Planners", desc: "Experienced travel coordinators who craft the perfect educational journey." },
-              { icon: CheckCircle, title: "Complete Tour Management", desc: "From travel arrangements to accommodations, we handle every detail." }
+              { 
+                icon: Globe, 
+                title: "11 Global Destinations", 
+                desc: "Carefully curated tours across Asia, Europe, Americas, and Australia.",
+                gradient: "from-blue-500 to-cyan-500",
+                bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
+                iconBg: "bg-blue-100",
+                iconColor: "text-blue-600"
+              },
+              { 
+                icon: Users, 
+                title: "Expert Tour Planners", 
+                desc: "Experienced travel coordinators who craft the perfect educational journey.",
+                gradient: "from-orange-500 to-pink-500",
+                bgColor: "bg-gradient-to-br from-orange-50 to-pink-50",
+                iconBg: "bg-orange-100",
+                iconColor: "text-orange-600"
+              },
+              { 
+                icon: CheckCircle, 
+                title: "Complete Tour Management", 
+                desc: "From travel arrangements to accommodations, we handle every detail.",
+                gradient: "from-green-500 to-emerald-500",
+                bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
+                iconBg: "bg-green-100",
+                iconColor: "text-green-600"
+              }
             ].map((item, i) => (
               <motion.div 
                 key={i}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ 
+                  opacity: 0, 
+                  x: i % 2 === 0 ? -100 : 100 
+                }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0 
+                }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: i * 0.3,
+                  type: "spring",
+                  bounce: 0.4
+                }}
                 whileHover={{ y: -10, scale: 1.03 }}
-                className="bg-white p-8 rounded-2xl border border-border/50 shadow-sm hover:shadow-2xl transition-shadow"
+                className={`${item.bgColor} p-8 rounded-2xl border-2 border-transparent hover:border-white shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group`}
               >
+                {/* Gradient overlay on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                
                 <motion.div 
-                  className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6"
+                  className={`w-14 h-14 ${item.iconBg} rounded-xl flex items-center justify-center ${item.iconColor} mb-6 relative z-10`}
                   whileHover={{ rotate: 360, scale: 1.15 }}
                   transition={{ duration: 0.6 }}
                 >
                   <item.icon size={32} />
                 </motion.div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">{item.title}</h3>
-                <p className="text-slate-700 leading-relaxed">{item.desc}</p>
+                <h3 className="text-xl font-bold mb-3 text-slate-900 relative z-10">{item.title}</h3>
+                <p className="text-slate-700 leading-relaxed relative z-10">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -271,25 +309,52 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {["Culture", "History", "Adventure", "Art & Museums", "Nature", "Local Life"].map((cat, i) => (
+            {[
+              { name: "Culture", gradient: "from-purple-500 to-pink-500", bg: "from-purple-50 to-pink-50", iconBg: "bg-purple-100", iconColor: "text-purple-600" },
+              { name: "History", gradient: "from-amber-500 to-orange-500", bg: "from-amber-50 to-orange-50", iconBg: "bg-amber-100", iconColor: "text-amber-600" },
+              { name: "Adventure", gradient: "from-red-500 to-rose-500", bg: "from-red-50 to-rose-50", iconBg: "bg-red-100", iconColor: "text-red-600" },
+              { name: "Art & Museums", gradient: "from-indigo-500 to-blue-500", bg: "from-indigo-50 to-blue-50", iconBg: "bg-indigo-100", iconColor: "text-indigo-600" },
+              { name: "Nature", gradient: "from-green-500 to-teal-500", bg: "from-green-50 to-teal-50", iconBg: "bg-green-100", iconColor: "text-green-600" },
+              { name: "Local Life", gradient: "from-cyan-500 to-sky-500", bg: "from-cyan-50 to-sky-50", iconBg: "bg-cyan-100", iconColor: "text-cyan-600" }
+            ].map((cat, i) => (
               <motion.div 
-                key={cat} 
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                key={cat.name} 
+                initial={{ 
+                  opacity: 0, 
+                  x: i % 2 === 0 ? -80 : 80,
+                  rotate: i % 2 === 0 ? -10 : 10
+                }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0,
+                  rotate: 0
+                }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                whileHover={{ scale: 1.08, y: -5 }}
+                transition={{ 
+                  duration: 0.7, 
+                  delay: i * 0.15,
+                  type: "spring",
+                  bounce: 0.5
+                }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  y: -8,
+                  rotate: 5
+                }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-white p-6 rounded-xl border border-border/50 text-center hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer group"
+                className={`bg-gradient-to-br ${cat.bg} p-6 rounded-xl border-2 border-transparent hover:border-white text-center shadow-md hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden`}
               >
+                {/* Gradient overlay on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
+                
                 <motion.div 
-                  className="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-600 mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors"
-                  whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-                  transition={{ duration: 0.5 }}
+                  className={`w-12 h-12 mx-auto ${cat.iconBg} rounded-full flex items-center justify-center ${cat.iconColor} mb-4 relative z-10`}
+                  whileHover={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                  transition={{ duration: 0.6 }}
                 >
                   <GraduationCap size={24} />
                 </motion.div>
-                <h3 className="font-bold text-sm md:text-base text-slate-900">{cat}</h3>
+                <h3 className="font-bold text-sm md:text-base text-slate-900 relative z-10">{cat.name}</h3>
               </motion.div>
             ))}
           </div>

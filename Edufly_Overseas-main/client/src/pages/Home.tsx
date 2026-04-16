@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Globe, GraduationCap, Users, Award, CheckCircle, Plane, ChevronLeft, ChevronRight, X, Quote } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -8,7 +8,7 @@ import { useDestinations, usePrograms, useTestimonials } from "@/hooks/use-resou
 import { useSiteSettings, useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const { data: destinations } = useDestinations();
@@ -26,6 +26,38 @@ export default function Home() {
   // Testimonial lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedTestimonialIndex, setSelectedTestimonialIndex] = useState(0);
+
+  // Auto-scroll carousel state for destinations
+  const [currentDestIndex, setCurrentDestIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const autoScrollTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-advance destinations every 4 seconds
+  useEffect(() => {
+    if (topDestinations.length === 0 || isPaused) return;
+
+    autoScrollTimer.current = setInterval(() => {
+      setCurrentDestIndex((prev) => (prev + 1) % topDestinations.length);
+    }, 4000); // 4 seconds per card
+
+    return () => {
+      if (autoScrollTimer.current) {
+        clearInterval(autoScrollTimer.current);
+      }
+    };
+  }, [topDestinations.length, isPaused]);
+
+  const handleDestinationManualScroll = (direction: 'prev' | 'next') => {
+    setIsPaused(true);
+    if (direction === 'prev') {
+      setCurrentDestIndex((prev) => (prev - 1 + topDestinations.length) % topDestinations.length);
+    } else {
+      setCurrentDestIndex((prev) => (prev + 1) % topDestinations.length);
+    }
+    // Resume auto-scroll after 10 seconds of inactivity
+    if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
+    setTimeout(() => setIsPaused(false), 10000);
+  };
 
   const openTestimonialLightbox = (index: number) => {
     setSelectedTestimonialIndex(index);
@@ -261,7 +293,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Destinations Grid - Infinite Scrolling */}
+      {/* Destinations Carousel - Auto-scroll with Zoom */}
       <section className="section-padding bg-slate-50 overflow-hidden">
         <div className="container-custom">
           <motion.div 
@@ -284,52 +316,124 @@ export default function Home() {
 
           {topDestinations.length > 0 ? (
             <div className="relative">
-              {/* Infinite scrolling row - RIGHT to LEFT */}
-              <motion.div 
-                className="flex gap-6"
-                animate={{
-                  x: [0, -2400],
-                }}
-                transition={{
-                  x: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 30,
-                    ease: "linear",
-                  },
-                }}
-              >
-                {/* Duplicate destinations for seamless loop */}
-                {[...Array(3)].map((_, setIndex) => (
-                  <div key={setIndex} className="flex gap-6 shrink-0">
-                    {topDestinations.map((dest) => (
-                      <Link key={`${setIndex}-${dest.id}`} href={`/destinations/${dest.slug}`}>
-                        <motion.div 
-                          whileHover={{ scale: 1.05, y: -10 }}
-                          className="group relative h-80 w-[320px] rounded-2xl overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all shrink-0"
-                        >
-                          <img 
-                            src={dest.imageUrl || "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80"} 
-                            alt={dest.name} 
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-6 flex flex-col justify-end">
-                            <h3 className="text-2xl font-bold text-white mb-2 font-heading">{dest.name}</h3>
-                            <motion.p 
-                              className="text-white/90 text-sm"
-                              initial={{ opacity: 0, y: 10 }}
-                              whileHover={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              Explore Tour Highlights →
-                            </motion.p>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
-              </motion.div>
+              {/* Carousel Container */}
+              <div className="relative h-[400px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {topDestinations.map((dest, index) => {
+                    const isCenter = index === currentDestIndex;
+                    const isPrev = index === (currentDestIndex - 1 + topDestinations.length) % topDestinations.length;
+                    const isNext = index === (currentDestIndex + 1) % topDestinations.length;
+                    
+                    if (!isCenter && !isPrev && !isNext) return null;
+
+                    let position = 0;
+                    let scale = 0.7;
+                    let opacity = 0.4;
+                    let zIndex = 1;
+
+                    if (isCenter) {
+                      position = 0;
+                      scale = 1.15; // Zoom effect
+                      opacity = 1;
+                      zIndex = 10;
+                    } else if (isPrev) {
+                      position = -400;
+                      scale = 0.85;
+                      opacity = 0.6;
+                      zIndex = 5;
+                    } else if (isNext) {
+                      position = 400;
+                      scale = 0.85;
+                      opacity = 0.6;
+                      zIndex = 5;
+                    }
+
+                    return (
+                      <motion.div
+                        key={dest.id}
+                        initial={{ x: 400, scale: 0.7, opacity: 0 }}
+                        animate={{ 
+                          x: position, 
+                          scale, 
+                          opacity,
+                          zIndex
+                        }}
+                        exit={{ x: -400, scale: 0.7, opacity: 0 }}
+                        transition={{ 
+                          duration: 0.6,
+                          ease: "easeInOut"
+                        }}
+                        className="absolute"
+                      >
+                        <Link href={`/destinations/${dest.slug}`}>
+                          <motion.div 
+                            whileHover={{ scale: isCenter ? 1.2 : scale }}
+                            className="group relative h-80 w-[350px] rounded-2xl overflow-hidden cursor-pointer shadow-2xl transition-all"
+                          >
+                            <img 
+                              src={dest.imageUrl || "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80"} 
+                              alt={dest.name} 
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-6 flex flex-col justify-end">
+                              <h3 className="text-2xl font-bold text-white mb-2 font-heading">{dest.name}</h3>
+                              {isCenter && (
+                                <motion.p 
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.3 }}
+                                  className="text-white/90 text-sm"
+                                >
+                                  Explore Tour Highlights →
+                                </motion.p>
+                              )}
+                            </div>
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <button
+                  onClick={() => handleDestinationManualScroll('prev')}
+                  className="p-3 rounded-full bg-white shadow-lg hover:bg-slate-100 transition-colors"
+                  aria-label="Previous destination"
+                >
+                  <ChevronLeft className="w-6 h-6 text-slate-700" />
+                </button>
+                
+                {/* Dots indicator */}
+                <div className="flex gap-2">
+                  {topDestinations.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentDestIndex(index);
+                        setIsPaused(true);
+                        setTimeout(() => setIsPaused(false), 10000);
+                      }}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentDestIndex 
+                          ? 'w-8 bg-primary' 
+                          : 'w-2 bg-slate-300 hover:bg-slate-400'
+                      }`}
+                      aria-label={`Go to destination ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handleDestinationManualScroll('next')}
+                  className="p-3 rounded-full bg-white shadow-lg hover:bg-slate-100 transition-colors"
+                  aria-label="Next destination"
+                >
+                  <ChevronRight className="w-6 h-6 text-slate-700" />
+                </button>
+              </div>
             </div>
           ) : (
             // Fallback if no data
@@ -362,79 +466,35 @@ export default function Home() {
             <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
-          {/* Infinite scrolling row - scrolls RIGHT to LEFT */}
+          {/* Single row - all 6 categories - scrolls RIGHT to LEFT */}
           <motion.div 
-            className="flex gap-6 mb-6"
+            className="flex gap-6"
             animate={{
-              x: [-1800, 0],
+              x: [0, -2400],
             }}
             transition={{
               x: {
                 repeat: Infinity,
                 repeatType: "loop",
-                duration: 25,
+                duration: 30,
                 ease: "linear",
               },
             }}
           >
             {/* Duplicate cards for seamless loop */}
-            {[...Array(4)].map((_, setIndex) => (
+            {[...Array(3)].map((_, setIndex) => (
               <div key={setIndex} className="flex gap-6 shrink-0">
                 {[
                   { name: "Culture", gradient: "from-purple-600 via-fuchsia-600 to-pink-600", bg: "from-purple-100 to-pink-100", iconBg: "from-purple-600 to-pink-600", border: "border-purple-400" },
                   { name: "History", gradient: "from-yellow-600 via-orange-600 to-red-600", bg: "from-yellow-100 to-red-100", iconBg: "from-yellow-600 to-red-600", border: "border-yellow-400" },
-                  { name: "Adventure", gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" }
-                ].map((cat) => (
-                  <motion.div 
-                    key={`${setIndex}-${cat.name}`}
-                    whileHover={{ scale: 1.12, y: -10, rotate: 5 }}
-                    className={`bg-gradient-to-br ${cat.bg} w-[200px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden shrink-0`}
-                  >
-                    <motion.div 
-                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-10 group-hover:opacity-30`}
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    
-                    <motion.div 
-                      className={`w-14 h-14 mx-auto bg-gradient-to-br ${cat.iconBg} rounded-full flex items-center justify-center text-white mb-4 relative z-10 shadow-lg`}
-                      whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <GraduationCap size={28} strokeWidth={2.5} />
-                    </motion.div>
-                    <h3 className="font-bold text-base text-slate-900 relative z-10">{cat.name}</h3>
-                  </motion.div>
-                ))}
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Second row - scrolls LEFT to RIGHT */}
-          <motion.div 
-            className="flex gap-6"
-            animate={{
-              x: [0, -1800],
-            }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 25,
-                ease: "linear",
-              },
-            }}
-          >
-            {[...Array(4)].map((_, setIndex) => (
-              <div key={setIndex} className="flex gap-6 shrink-0">
-                {[
+                  { name: "Adventure", gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" },
                   { name: "Art & Museums", gradient: "from-indigo-600 via-blue-600 to-cyan-600", bg: "from-indigo-100 to-cyan-100", iconBg: "from-indigo-600 to-cyan-600", border: "border-indigo-400" },
                   { name: "Nature", gradient: "from-green-600 via-emerald-600 to-teal-600", bg: "from-green-100 to-teal-100", iconBg: "from-green-600 to-teal-600", border: "border-green-400" },
                   { name: "Local Life", gradient: "from-sky-600 via-blue-600 to-indigo-600", bg: "from-sky-100 to-indigo-100", iconBg: "from-sky-600 to-indigo-600", border: "border-sky-400" }
                 ].map((cat) => (
                   <motion.div 
                     key={`${setIndex}-${cat.name}`}
-                    whileHover={{ scale: 1.12, y: -10, rotate: -5 }}
+                    whileHover={{ scale: 1.12, y: -10, rotate: 5 }}
                     className={`bg-gradient-to-br ${cat.bg} w-[200px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden shrink-0`}
                   >
                     <motion.div 

@@ -178,7 +178,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       
       // Get full amount from settings for total_amount
       const settingsResult = await pool.query('SELECT payment_full_amount FROM site_settings LIMIT 1');
-      const fullAmount = settingsResult.rows[0]?.payment_full_amount || 350000;
+      const fullAmount = settingsResult.rows[0]?.payment_full_amount || 410000;
       
       // Calculate total and remaining
       const totalAmount = fullAmount * 100; // in paise
@@ -544,14 +544,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       
       if (result.rows.length === 0) {
         return res.json({
-          fullAmount: 350000,
+          fullAmount: 410000,
           enablePartPayment: true
         });
       }
 
       const settings = result.rows[0];
       res.json({
-        fullAmount: settings.payment_full_amount || 350000,
+        fullAmount: settings.payment_full_amount || 410000,
         enablePartPayment: settings.payment_enable_part_payment !== false
       });
     } catch (err) {

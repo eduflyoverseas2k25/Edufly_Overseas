@@ -1829,9 +1829,9 @@ function SettingsPanel() {
             <Label>Full Payment Amount (₹)</Label>
             <Input 
               type="number"
-              value={currentSettings.paymentFullAmount || 350000} 
-              onChange={(e) => setFormData({ ...formData, paymentFullAmount: parseInt(e.target.value) || 350000 })}
-              placeholder="350000"
+              value={currentSettings.paymentFullAmount || 410000} 
+              onChange={(e) => setFormData({ ...formData, paymentFullAmount: parseInt(e.target.value) || 410000 })}
+              placeholder="410000"
               data-testid="input-payment-full-amount"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -1861,8 +1861,8 @@ function SettingsPanel() {
           <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
             <p className="text-sm text-amber-800">
               <strong>Current Settings:</strong><br />
-              Full Payment: ₹{(currentSettings.paymentFullAmount || 350000).toLocaleString('en-IN')}<br />
-              Part Payment (1/3): ₹{Math.floor((currentSettings.paymentFullAmount || 350000) / 3).toLocaleString('en-IN')}<br />
+              Full Payment: ₹{(currentSettings.paymentFullAmount || 410000).toLocaleString('en-IN')}<br />
+              Part Payment (1/3): ₹{Math.floor((currentSettings.paymentFullAmount || 410000) / 3).toLocaleString('en-IN')}<br />
               Part Payment Status: {currentSettings.paymentEnablePartPayment !== false ? '✅ Enabled' : '❌ Disabled'}
             </p>
           </div>

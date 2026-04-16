@@ -408,7 +408,7 @@ export function SarahChatbot() {
       const response = await fetch('/api/payment/settings');
       const settings = await response.json();
       
-      const fullAmount = settings.fullAmount || 350000;
+      const fullAmount = settings.fullAmount || 410000;
       const partAmount = Math.floor(fullAmount / 3);
       const enablePartPayment = settings.enablePartPayment !== false;
       
@@ -440,8 +440,8 @@ export function SarahChatbot() {
       addBotMessage(
         "You can make payment for the **NASA STEM Educational Tour**.\n\nChoose payment option:",
         [
-          { label: "💳 Full Payment (₹3,50,000)", action: "pay_now", data: { type: 'full', amount: 350000 } },
-          { label: "💰 Part Payment (₹1,16,667 - 1/3)", action: "pay_now", data: { type: 'part', amount: 116667 } },
+          { label: "💳 Full Payment (₹4,10,000)", action: "pay_now", data: { type: 'full', amount: 410000 } },
+          { label: "💰 Part Payment (₹1,36,667 - 1/3)", action: "pay_now", data: { type: 'part', amount: 136667 } },
           { label: "← Back", action: "back_to_main" }
         ]
       );
@@ -450,7 +450,7 @@ export function SarahChatbot() {
 
   const handlePayNow = (data: any) => {
     const paymentType = data?.type || 'full';
-    const amount = data?.amount || 350000;
+    const amount = data?.amount || 410000;
     
     addUserMessage(paymentType === 'full' ? 'Full Payment' : `Part Payment (₹${amount.toLocaleString('en-IN')})`);
     

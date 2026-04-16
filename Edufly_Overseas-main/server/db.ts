@@ -147,7 +147,7 @@ export async function initializeDatabase() {
       about_values TEXT,
       home_features_title TEXT DEFAULT 'Why Choose Edufly Overseas',
       home_features_subtitle TEXT DEFAULT 'Experience the difference with our comprehensive educational travel services',
-      payment_full_amount INTEGER DEFAULT 350000,
+      payment_full_amount INTEGER DEFAULT 410000,
       payment_enable_part_payment BOOLEAN DEFAULT TRUE
     );
     

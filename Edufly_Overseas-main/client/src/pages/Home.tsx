@@ -261,10 +261,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Destinations Grid */}
-      <section className="section-padding bg-slate-50">
+      {/* Destinations Grid - Infinite Scrolling */}
+      <section className="section-padding bg-slate-50 overflow-hidden">
         <div className="container-custom">
-          <div className="flex justify-between items-end mb-12">
+          <motion.div 
+            className="flex justify-between items-end mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <div>
               <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Popular Destinations</h2>
               <p className="text-lg text-slate-700">Explore our carefully curated tour destinations across 11 countries.</p>
@@ -274,38 +280,69 @@ export default function Home() {
                 View All <ArrowRight size={16} />
               </Button>
             </Link>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topDestinations.length > 0 ? (
-              topDestinations.map((dest) => (
-                <Link key={dest.id} href={`/destinations/${dest.slug}`}>
-                  <div className="group relative h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md">
-                    <img 
-                      src={dest.imageUrl || "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80"} 
-                      alt={dest.name} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-                      <h3 className="text-2xl font-bold text-white mb-1 font-heading">{dest.name}</h3>
-                      <p className="text-white/80 text-sm opacity-0 transform translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-                        Explore Tour Highlights
-                      </p>
-                    </div>
+          {topDestinations.length > 0 ? (
+            <div className="relative">
+              {/* Infinite scrolling row - RIGHT to LEFT */}
+              <motion.div 
+                className="flex gap-6"
+                animate={{
+                  x: [0, -2400],
+                }}
+                transition={{
+                  x: {
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    duration: 30,
+                    ease: "linear",
+                  },
+                }}
+              >
+                {/* Duplicate destinations for seamless loop */}
+                {[...Array(3)].map((_, setIndex) => (
+                  <div key={setIndex} className="flex gap-6 shrink-0">
+                    {topDestinations.map((dest) => (
+                      <Link key={`${setIndex}-${dest.id}`} href={`/destinations/${dest.slug}`}>
+                        <motion.div 
+                          whileHover={{ scale: 1.05, y: -10 }}
+                          className="group relative h-80 w-[320px] rounded-2xl overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all shrink-0"
+                        >
+                          <img 
+                            src={dest.imageUrl || "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80"} 
+                            alt={dest.name} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-6 flex flex-col justify-end">
+                            <h3 className="text-2xl font-bold text-white mb-2 font-heading">{dest.name}</h3>
+                            <motion.p 
+                              className="text-white/90 text-sm"
+                              initial={{ opacity: 0, y: 10 }}
+                              whileHover={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              Explore Tour Highlights →
+                            </motion.p>
+                          </div>
+                        </motion.div>
+                      </Link>
+                    ))}
                   </div>
-                </Link>
-              ))
-            ) : (
-              // Fallback if no data
-              [1, 2, 3, 4].map((i) => (
+                ))}
+              </motion.div>
+            </div>
+          ) : (
+            // Fallback if no data
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="h-80 bg-slate-200 rounded-2xl animate-pulse" />
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
           
-          <div className="mt-8 md:hidden text-center">
+          <div className="mt-8 text-center">
             <Link href="/destinations">
-              <Button variant="outline" className="w-full">View All Destinations</Button>
+              <Button variant="outline" className="md:hidden w-full">View All Destinations</Button>
             </Link>
           </div>
         </div>

@@ -75,6 +75,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       
       const root = document.documentElement;
       
+      // Apply color variables
       if (settings.primaryColor) {
         const hsl = hexToHsl(settings.primaryColor);
         if (hsl) root.style.setProperty("--primary", hsl);
@@ -90,6 +91,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (settings.textColor) {
         const hsl = hexToHsl(settings.textColor);
         if (hsl) root.style.setProperty("--foreground", hsl);
+      }
+      
+      // Apply hero gradient colors
+      if (settings.heroGradientFrom) {
+        root.style.setProperty("--hero-from", settings.heroGradientFrom);
+      }
+      if (settings.heroGradientVia) {
+        root.style.setProperty("--hero-via", settings.heroGradientVia);
+      }
+      if (settings.heroGradientTo) {
+        root.style.setProperty("--hero-to", settings.heroGradientTo);
       }
     }
   }, [settings]);

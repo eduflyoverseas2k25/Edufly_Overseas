@@ -527,12 +527,34 @@ export default function Home() {
 
           {/* Circular Orbit Container - Fixed centering */}
           <div className="relative h-[650px] md:h-[750px] flex items-center justify-center mx-auto max-w-[800px]">
-            {/* Rotating container for cards (NO LINES) */}
+            
+            {/* Center Heading - STATIONARY (doesn't move) */}
+            <motion.div 
+              className="absolute z-20 text-center bg-slate-800 border-[3px] border-white w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl ring-4 ring-white/10"
+              style={{
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading text-white mb-1 leading-tight tracking-tight">
+                Tour
+              </h2>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-tight tracking-tight">
+                Experiences
+              </h2>
+            </motion.div>
+
+            {/* Rotating container ONLY for the 6 cards */}
             <motion.div
               className="absolute inset-0"
               animate={{ rotate: 360 }}
               transition={{
-                duration: 60,
+                duration: 90,  // Slower: 90 seconds for one rotation
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -578,7 +600,7 @@ export default function Home() {
                     <motion.div
                       animate={{ rotate: -360 }}
                       transition={{
-                        duration: 60,
+                        duration: 90,  // Match parent rotation speed
                         repeat: Infinity,
                         ease: "linear"
                       }}
@@ -606,27 +628,6 @@ export default function Home() {
                   </motion.div>
                 );
               })}
-            </motion.div>
-
-            {/* Center Heading - Perfectly centered, SHARP & ROUND */}
-            <motion.div 
-              className="absolute z-20 text-center bg-slate-800 border-[3px] border-white w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl ring-4 ring-white/10"
-              style={{
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading text-white mb-1 leading-tight tracking-tight">
-                Tour
-              </h2>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-tight tracking-tight">
-                Experiences
-              </h2>
             </motion.div>
           </div>
         </div>

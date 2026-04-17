@@ -495,9 +495,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tour Experiences - Orbital Layout */}
-      <section className="section-padding overflow-hidden bg-gradient-to-b from-slate-50 to-white">
-        <div className="container-custom">
+      {/* Tour Experiences - Orbital Layout with Dark Theme */}
+      <section className="section-padding overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
+        {/* Animated background stars/dots */}
+        <motion.div 
+          className="absolute inset-0 opacity-20"
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%"],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+          style={{
+            backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+            backgroundSize: "50px 50px"
+          }}
+        />
+
+        <div className="container-custom relative z-10">
           <motion.div 
             className="text-center max-w-3xl mx-auto mb-8"
             initial={{ opacity: 0, y: 30 }}
@@ -505,35 +522,67 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
+            <p className="text-lg text-white/80">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
           {/* Circular Orbit Container */}
           <div className="relative h-[600px] md:h-[700px] flex items-center justify-center">
+            {/* SVG for connecting lines */}
+            <svg 
+              className="absolute inset-0 w-full h-full pointer-events-none" 
+              style={{ zIndex: 5 }}
+            >
+              {[0, 60, 120, 180, 240, 300].map((angle) => {
+                const radius = 250;
+                const angleRad = (angle * Math.PI) / 180;
+                const x = Math.cos(angleRad) * radius;
+                const y = Math.sin(angleRad) * radius;
+                const centerX = '50%';
+                const centerY = '50%';
+                
+                return (
+                  <motion.line
+                    key={angle}
+                    x1={centerX}
+                    y1={centerY}
+                    x2={`calc(50% + ${x}px)`}
+                    y2={`calc(50% + ${y}px)`}
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="2"
+                    strokeDasharray="5,5"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, delay: 0.5 + (angle / 300) }}
+                  />
+                );
+              })}
+            </svg>
+
             {/* Center Heading */}
             <motion.div 
-              className="absolute z-20 text-center"
+              className="absolute z-20 text-center bg-slate-800 border-2 border-white/30 rounded-full px-8 py-6 shadow-2xl"
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading text-slate-900 mb-2">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading text-white mb-1">
                 Tour
               </h2>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                 Experiences
               </h2>
             </motion.div>
 
             {/* Orbiting Cards */}
             {[
-              { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", bg: "from-purple-100 to-pink-100", iconBg: "from-purple-600 to-pink-600", border: "border-purple-400" },
-              { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", bg: "from-yellow-100 to-red-100", iconBg: "from-yellow-600 to-red-600", border: "border-yellow-400" },
-              { name: "Adventure", angle: 120, gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" },
-              { name: "Art & Museums", angle: 180, gradient: "from-indigo-600 via-blue-600 to-cyan-600", bg: "from-indigo-100 to-cyan-100", iconBg: "from-indigo-600 to-cyan-600", border: "border-indigo-400" },
-              { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", bg: "from-green-100 to-teal-100", iconBg: "from-green-600 to-teal-600", border: "border-green-400" },
-              { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", bg: "from-sky-100 to-indigo-100", iconBg: "from-sky-600 to-indigo-600", border: "border-sky-400" }
+              { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", border: "border-purple-400" },
+              { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", border: "border-yellow-400" },
+              { name: "Adventure", angle: 120, gradient: "from-red-600 via-rose-600 to-pink-600", border: "border-red-400" },
+              { name: "Art & Museums", angle: 180, gradient: "from-indigo-600 via-blue-600 to-cyan-600", border: "border-indigo-400" },
+              { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", border: "border-green-400" },
+              { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", border: "border-sky-400" }
             ].map((cat, index) => {
               // Calculate position on circle
               const radius = 250; // Distance from center
@@ -550,7 +599,8 @@ export default function Home() {
                     top: '50%',
                     marginLeft: `${x}px`,
                     marginTop: `${y}px`,
-                    transform: 'translate(-50%, -50%)'
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10
                   }}
                   initial={{ opacity: 0, scale: 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -575,22 +625,22 @@ export default function Home() {
                 >
                   <motion.div 
                     whileHover={{ scale: 1.15, rotate: 5 }}
-                    className={`bg-gradient-to-br ${cat.bg} w-[160px] md:w-[180px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-default group relative overflow-hidden`}
+                    className={`bg-slate-800/80 backdrop-blur-sm w-[140px] md:w-[160px] p-5 rounded-full border-2 ${cat.border} text-center shadow-2xl hover:shadow-3xl transition-all cursor-default group relative overflow-hidden`}
                   >
                     <motion.div 
-                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-10 group-hover:opacity-30`}
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-20`}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                     />
                     
                     <motion.div 
-                      className={`w-14 h-14 mx-auto bg-gradient-to-br ${cat.iconBg} rounded-full flex items-center justify-center text-white mb-4 relative z-10 shadow-lg`}
+                      className={`w-12 h-12 mx-auto bg-gradient-to-br ${cat.gradient} rounded-full flex items-center justify-center text-white mb-3 relative z-10 shadow-lg`}
                       whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
                       transition={{ duration: 0.6 }}
                     >
-                      <GraduationCap size={28} strokeWidth={2.5} />
+                      <GraduationCap size={24} strokeWidth={2.5} />
                     </motion.div>
-                    <h3 className="font-bold text-sm md:text-base text-slate-900 relative z-10">{cat.name}</h3>
+                    <h3 className="font-bold text-xs md:text-sm text-white relative z-10">{cat.name}</h3>
                   </motion.div>
                 </motion.div>
               );

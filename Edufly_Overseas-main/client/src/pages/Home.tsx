@@ -525,16 +525,17 @@ export default function Home() {
             <p className="text-lg text-white/80">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
-          {/* Circular Orbit Container - Fixed centering */}
-          <div className="relative h-[650px] md:h-[750px] flex items-center justify-center mx-auto max-w-[800px]">
+          {/* Circular Orbit Container - PERFECTLY CENTERED like a wheel */}
+          <div className="relative h-[650px] md:h-[750px] w-full flex items-center justify-center">
             
-            {/* Center Heading - STATIONARY (doesn't move) */}
+            {/* Center Heading - STATIONARY in EXACT CENTER (like wheel hub) */}
             <motion.div 
-              className="absolute z-20 text-center bg-slate-800 border-[3px] border-white w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl ring-4 ring-white/10"
+              className="absolute text-center bg-slate-800 border-[3px] border-white w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl ring-4 ring-white/10"
               style={{
                 left: '50%',
                 top: '50%',
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20
               }}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -549,9 +550,9 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            {/* Rotating container ONLY for the 6 cards */}
+            {/* Rotating container ONLY for the 6 cards (like wheel spokes) */}
             <motion.div
-              className="absolute inset-0"
+              className="absolute w-full h-full"
               animate={{ rotate: 360 }}
               transition={{
                 duration: 90,  // Slower: 90 seconds for one rotation
@@ -559,7 +560,7 @@ export default function Home() {
                 ease: "linear"
               }}
             >
-              {/* Orbiting Cards - Circular shapes */}
+              {/* Orbiting Cards - Circular shapes (like wheel rim) */}
               {[
                 { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", border: "border-purple-400" },
                 { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", border: "border-yellow-400" },
@@ -568,7 +569,7 @@ export default function Home() {
                 { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", border: "border-green-400" },
                 { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", border: "border-sky-400" }
               ].map((cat, index) => {
-                // Calculate position on circle - EQUAL DISTANCE
+                // Calculate position on circle - EQUAL DISTANCE from CENTER
                 const radius = 280;
                 const angleRad = (cat.angle * Math.PI) / 180;
                 const x = Math.cos(angleRad) * radius;

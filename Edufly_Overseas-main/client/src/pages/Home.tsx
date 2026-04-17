@@ -495,50 +495,87 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Programs Section */}
+      {/* Tour Experiences - Orbital Layout */}
       <section className="section-padding overflow-hidden bg-gradient-to-b from-slate-50 to-white">
         <div className="container-custom">
           <motion.div 
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold font-heading text-slate-900 mb-4">Tour Experiences</h2>
             <p className="text-lg text-slate-700">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
-          {/* Single row - all 6 categories - scrolls RIGHT to LEFT */}
-          <motion.div 
-            className="flex gap-6"
-            animate={{
-              x: [0, -2400],
-            }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 30,
-                ease: "linear",
-              },
-            }}
-          >
-            {/* Duplicate cards for seamless loop */}
-            {[...Array(3)].map((_, setIndex) => (
-              <div key={setIndex} className="flex gap-6 shrink-0">
-                {[
-                  { name: "Culture", gradient: "from-purple-600 via-fuchsia-600 to-pink-600", bg: "from-purple-100 to-pink-100", iconBg: "from-purple-600 to-pink-600", border: "border-purple-400" },
-                  { name: "History", gradient: "from-yellow-600 via-orange-600 to-red-600", bg: "from-yellow-100 to-red-100", iconBg: "from-yellow-600 to-red-600", border: "border-yellow-400" },
-                  { name: "Adventure", gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" },
-                  { name: "Art & Museums", gradient: "from-indigo-600 via-blue-600 to-cyan-600", bg: "from-indigo-100 to-cyan-100", iconBg: "from-indigo-600 to-cyan-600", border: "border-indigo-400" },
-                  { name: "Nature", gradient: "from-green-600 via-emerald-600 to-teal-600", bg: "from-green-100 to-teal-100", iconBg: "from-green-600 to-teal-600", border: "border-green-400" },
-                  { name: "Local Life", gradient: "from-sky-600 via-blue-600 to-indigo-600", bg: "from-sky-100 to-indigo-100", iconBg: "from-sky-600 to-indigo-600", border: "border-sky-400" }
-                ].map((cat) => (
+          {/* Circular Orbit Container */}
+          <div className="relative h-[600px] md:h-[700px] flex items-center justify-center">
+            {/* Center Heading */}
+            <motion.div 
+              className="absolute z-20 text-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading text-slate-900 mb-2">
+                Tour
+              </h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                Experiences
+              </h2>
+            </motion.div>
+
+            {/* Orbiting Cards */}
+            {[
+              { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", bg: "from-purple-100 to-pink-100", iconBg: "from-purple-600 to-pink-600", border: "border-purple-400" },
+              { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", bg: "from-yellow-100 to-red-100", iconBg: "from-yellow-600 to-red-600", border: "border-yellow-400" },
+              { name: "Adventure", angle: 120, gradient: "from-red-600 via-rose-600 to-pink-600", bg: "from-red-100 to-pink-100", iconBg: "from-red-600 to-pink-600", border: "border-red-400" },
+              { name: "Art & Museums", angle: 180, gradient: "from-indigo-600 via-blue-600 to-cyan-600", bg: "from-indigo-100 to-cyan-100", iconBg: "from-indigo-600 to-cyan-600", border: "border-indigo-400" },
+              { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", bg: "from-green-100 to-teal-100", iconBg: "from-green-600 to-teal-600", border: "border-green-400" },
+              { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", bg: "from-sky-100 to-indigo-100", iconBg: "from-sky-600 to-indigo-600", border: "border-sky-400" }
+            ].map((cat, index) => {
+              // Calculate position on circle
+              const radius = 250; // Distance from center
+              const angleRad = (cat.angle * Math.PI) / 180;
+              const x = Math.cos(angleRad) * radius;
+              const y = Math.sin(angleRad) * radius;
+
+              return (
+                <motion.div
+                  key={cat.name}
+                  className="absolute"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    marginLeft: `${x}px`,
+                    marginTop: `${y}px`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: 0.8 + (index * 0.1),
+                    type: "spring",
+                    stiffness: 100
+                  }}
+                  animate={{
+                    y: [0, -15, 0],
+                  }}
+                  transition={{
+                    y: {
+                      duration: 3 + (index * 0.3),
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut"
+                    }
+                  }}
+                >
                   <motion.div 
-                    key={`${setIndex}-${cat.name}`}
-                    whileHover={{ scale: 1.12, y: -10, rotate: 5 }}
-                    className={`bg-gradient-to-br ${cat.bg} w-[200px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden shrink-0`}
+                    whileHover={{ scale: 1.15, rotate: 5 }}
+                    className={`bg-gradient-to-br ${cat.bg} w-[160px] md:w-[180px] p-6 rounded-2xl border-2 ${cat.border} text-center shadow-xl hover:shadow-2xl transition-all cursor-default group relative overflow-hidden`}
                   >
                     <motion.div 
                       className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-10 group-hover:opacity-30`}
@@ -553,12 +590,12 @@ export default function Home() {
                     >
                       <GraduationCap size={28} strokeWidth={2.5} />
                     </motion.div>
-                    <h3 className="font-bold text-base text-slate-900 relative z-10">{cat.name}</h3>
+                    <h3 className="font-bold text-sm md:text-base text-slate-900 relative z-10">{cat.name}</h3>
                   </motion.div>
-                ))}
-              </div>
-            ))}
-          </motion.div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 

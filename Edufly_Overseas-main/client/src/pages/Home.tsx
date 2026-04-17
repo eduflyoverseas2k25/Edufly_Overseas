@@ -172,24 +172,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="py-10 bg-slate-50 border-b border-border">
-        <div className="container-custom grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="flex flex-col items-center text-center">
-            <Globe className="w-10 h-10 text-primary mb-3" />
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Global Reach</span>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <GraduationCap className="w-10 h-10 text-primary mb-3" />
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Expert Guidance</span>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <Users className="w-10 h-10 text-primary mb-3" />
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Trusted by Families</span>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <CheckCircle className="w-10 h-10 text-primary mb-3" />
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Proven Results</span>
+      {/* Animated Stats Counter */}
+      <section className="py-16 bg-gradient-to-r from-primary via-secondary to-primary relative overflow-hidden">
+        {/* Animated background pattern */}
+        <motion.div 
+          className="absolute inset-0 opacity-10"
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+          style={{
+            backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+            backgroundSize: "50px 50px"
+          }}
+        />
+        
+        <div className="container-custom relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { 
+                icon: Users, 
+                end: 5000, 
+                suffix: "+", 
+                label: "Happy Students",
+                gradient: "from-yellow-400 to-orange-500"
+              },
+              { 
+                icon: Globe, 
+                end: 11, 
+                suffix: "", 
+                label: "Countries Covered",
+                gradient: "from-blue-400 to-cyan-500"
+              },
+              { 
+                icon: Award, 
+                end: 150, 
+                suffix: "+", 
+                label: "Schools Partnered",
+                gradient: "from-green-400 to-emerald-500"
+              },
+              { 
+                icon: CheckCircle, 
+                end: 98, 
+                suffix: "%", 
+                label: "Success Rate",
+                gradient: "from-pink-400 to-rose-500"
+              }
+            ].map((stat, index) => (
+              <StatCounter 
+                key={index}
+                icon={stat.icon}
+                end={stat.end}
+                suffix={stat.suffix}
+                label={stat.label}
+                gradient={stat.gradient}
+                delay={index * 0.2}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -670,5 +713,97 @@ export default function Home() {
 
       <Footer />
     </div>
+  );
+}
+
+// Animated Stats Counter Component
+function StatCounter({ 
+  icon: Icon, 
+  end, 
+  suffix, 
+  label, 
+  gradient,
+  delay 
+}: { 
+  icon: any; 
+  end: number; 
+  suffix: string; 
+  label: string; 
+  gradient: string;
+  delay: number;
+}) {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const counterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          
+          // Animate counter
+          const duration = 2000; // 2 seconds
+          const steps = 60;
+          const increment = end / steps;
+          let current = 0;
+
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, duration / steps);
+
+          return () => clearInterval(timer);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (counterRef.current) {
+      observer.observe(counterRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [end, hasAnimated]);
+
+  return (
+    <motion.div
+      ref={counterRef}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className="flex flex-col items-center text-center group cursor-default"
+    >
+      <motion.div 
+        className={`w-20 h-20 mb-4 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-2xl`}
+        whileHover={{ scale: 1.15, rotate: 360 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Icon className="w-10 h-10 text-white" strokeWidth={2.5} />
+      </motion.div>
+      
+      <motion.div 
+        className="text-5xl md:text-6xl font-bold text-white mb-2 font-heading"
+        animate={{ 
+          scale: hasAnimated ? [1, 1.1, 1] : 1 
+        }}
+        transition={{ 
+          duration: 0.5,
+          delay: delay + 2
+        }}
+      >
+        {count.toLocaleString()}{suffix}
+      </motion.div>
+      
+      <p className="text-white/90 text-sm md:text-base font-semibold uppercase tracking-wider">
+        {label}
+      </p>
+    </motion.div>
   );
 }

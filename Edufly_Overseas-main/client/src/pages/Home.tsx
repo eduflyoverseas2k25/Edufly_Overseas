@@ -527,7 +527,7 @@ export default function Home() {
 
           {/* Circular Orbit Container - Fixed centering */}
           <div className="relative h-[650px] md:h-[750px] flex items-center justify-center mx-auto max-w-[800px]">
-            {/* Rotating container for cards and lines */}
+            {/* Rotating container for cards (NO LINES) */}
             <motion.div
               className="absolute inset-0"
               animate={{ rotate: 360 }}
@@ -537,36 +537,6 @@ export default function Home() {
                 ease: "linear"
               }}
             >
-              {/* SVG for connecting lines */}
-              <svg 
-                className="absolute inset-0 w-full h-full pointer-events-none" 
-                style={{ zIndex: 5 }}
-              >
-                {[0, 60, 120, 180, 240, 300].map((angle) => {
-                  const radius = 280;
-                  const angleRad = (angle * Math.PI) / 180;
-                  const x = Math.cos(angleRad) * radius;
-                  const y = Math.sin(angleRad) * radius;
-                  
-                  return (
-                    <motion.line
-                      key={angle}
-                      x1="50%"
-                      y1="50%"
-                      x2={`calc(50% + ${x}px)`}
-                      y2={`calc(50% + ${y}px)`}
-                      stroke="rgba(255,255,255,0.3)"
-                      strokeWidth="2"
-                      strokeDasharray="5,5"
-                      initial={{ pathLength: 0, opacity: 0 }}
-                      whileInView={{ pathLength: 1, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.5 + (angle / 360) }}
-                    />
-                  );
-                })}
-              </svg>
-
               {/* Orbiting Cards - Circular shapes */}
               {[
                 { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", border: "border-purple-400" },
@@ -638,9 +608,9 @@ export default function Home() {
               })}
             </motion.div>
 
-            {/* Center Heading - Perfectly centered, ROUND shape */}
+            {/* Center Heading - Perfectly centered, SHARP & ROUND */}
             <motion.div 
-              className="absolute z-20 text-center bg-slate-800 border-2 border-white/40 w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl"
+              className="absolute z-20 text-center bg-slate-800 border-[3px] border-white w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl ring-4 ring-white/10"
               style={{
                 left: '50%',
                 top: '50%',
@@ -651,10 +621,10 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-heading text-white mb-1 leading-tight">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading text-white mb-1 leading-tight tracking-tight">
                 Tour
               </h2>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-tight">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-tight tracking-tight">
                 Experiences
               </h2>
             </motion.div>

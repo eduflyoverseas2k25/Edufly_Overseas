@@ -19,7 +19,7 @@ export default function Home() {
   const isDark = theme === "dark";
 
   // Show top 4 destinations
-  const topDestinations = destinations?.slice(0, 4) || [];
+  const topDestinations = destinations || [];
   // Show top 6 program categories
   const topPrograms = programs?.slice(0, 6) || [];
 

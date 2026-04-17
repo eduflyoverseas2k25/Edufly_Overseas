@@ -495,7 +495,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tour Experiences - Orbital Layout with Dark Theme */}
+      {/* Tour Experiences - Orbital Layout with Dark Theme and Rotation */}
       <section className="section-padding overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
         {/* Animated background stars/dots */}
         <motion.div 
@@ -525,126 +525,139 @@ export default function Home() {
             <p className="text-lg text-white/80">Every destination offers unique cultural, historical, and educational experiences.</p>
           </motion.div>
 
-          {/* Circular Orbit Container */}
-          <div className="relative h-[600px] md:h-[700px] flex items-center justify-center">
-            {/* SVG for connecting lines */}
-            <svg 
-              className="absolute inset-0 w-full h-full pointer-events-none" 
-              style={{ zIndex: 5 }}
+          {/* Circular Orbit Container - Fixed centering */}
+          <div className="relative h-[650px] md:h-[750px] flex items-center justify-center mx-auto max-w-[800px]">
+            {/* Rotating container for cards and lines */}
+            <motion.div
+              className="absolute inset-0"
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 60,
+                repeat: Infinity,
+                ease: "linear"
+              }}
             >
-              {[0, 60, 120, 180, 240, 300].map((angle) => {
-                const radius = 250;
-                const angleRad = (angle * Math.PI) / 180;
+              {/* SVG for connecting lines */}
+              <svg 
+                className="absolute inset-0 w-full h-full pointer-events-none" 
+                style={{ zIndex: 5 }}
+              >
+                {[0, 60, 120, 180, 240, 300].map((angle) => {
+                  const radius = 280;
+                  const angleRad = (angle * Math.PI) / 180;
+                  const x = Math.cos(angleRad) * radius;
+                  const y = Math.sin(angleRad) * radius;
+                  
+                  return (
+                    <motion.line
+                      key={angle}
+                      x1="50%"
+                      y1="50%"
+                      x2={`calc(50% + ${x}px)`}
+                      y2={`calc(50% + ${y}px)`}
+                      stroke="rgba(255,255,255,0.3)"
+                      strokeWidth="2"
+                      strokeDasharray="5,5"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.5 + (angle / 360) }}
+                    />
+                  );
+                })}
+              </svg>
+
+              {/* Orbiting Cards - Circular shapes */}
+              {[
+                { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", border: "border-purple-400" },
+                { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", border: "border-yellow-400" },
+                { name: "Adventure", angle: 120, gradient: "from-red-600 via-rose-600 to-pink-600", border: "border-red-400" },
+                { name: "Art & Museums", angle: 180, gradient: "from-indigo-600 via-blue-600 to-cyan-600", border: "border-indigo-400" },
+                { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", border: "border-green-400" },
+                { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", border: "border-sky-400" }
+              ].map((cat, index) => {
+                // Calculate position on circle - EQUAL DISTANCE
+                const radius = 280;
+                const angleRad = (cat.angle * Math.PI) / 180;
                 const x = Math.cos(angleRad) * radius;
                 const y = Math.sin(angleRad) * radius;
-                const centerX = '50%';
-                const centerY = '50%';
-                
+
                 return (
-                  <motion.line
-                    key={angle}
-                    x1={centerX}
-                    y1={centerY}
-                    x2={`calc(50% + ${x}px)`}
-                    y2={`calc(50% + ${y}px)`}
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="2"
-                    strokeDasharray="5,5"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    whileInView={{ pathLength: 1, opacity: 1 }}
+                  <motion.div
+                    key={cat.name}
+                    className="absolute"
+                    style={{
+                      left: '50%',
+                      top: '50%',
+                      marginLeft: `${x}px`,
+                      marginTop: `${y}px`,
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 10
+                    }}
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1, delay: 0.5 + (angle / 300) }}
-                  />
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: 0.8 + (index * 0.1),
+                      type: "spring",
+                      stiffness: 100
+                    }}
+                  >
+                    {/* Counter-rotate to keep text upright */}
+                    <motion.div
+                      animate={{ rotate: -360 }}
+                      transition={{
+                        duration: 60,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    >
+                      <motion.div 
+                        whileHover={{ scale: 1.15 }}
+                        className={`bg-slate-800/90 backdrop-blur-sm w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-full border-2 ${cat.border} flex flex-col items-center justify-center shadow-2xl hover:shadow-3xl transition-all cursor-default group relative overflow-hidden`}
+                      >
+                        <motion.div 
+                          className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-20 rounded-full`}
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        />
+                        
+                        <motion.div 
+                          className={`w-12 h-12 bg-gradient-to-br ${cat.gradient} rounded-full flex items-center justify-center text-white mb-2 relative z-10 shadow-lg`}
+                          whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          <GraduationCap size={24} strokeWidth={2.5} />
+                        </motion.div>
+                        <h3 className="font-bold text-xs md:text-sm text-white relative z-10 px-2 text-center leading-tight">{cat.name}</h3>
+                      </motion.div>
+                    </motion.div>
+                  </motion.div>
                 );
               })}
-            </svg>
+            </motion.div>
 
-            {/* Center Heading */}
+            {/* Center Heading - Perfectly centered, ROUND shape */}
             <motion.div 
-              className="absolute z-20 text-center bg-slate-800 border-2 border-white/30 rounded-full px-8 py-6 shadow-2xl"
+              className="absolute z-20 text-center bg-slate-800 border-2 border-white/40 w-[200px] h-[200px] md:w-[240px] md:h-[240px] rounded-full flex flex-col items-center justify-center shadow-2xl"
+              style={{
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading text-white mb-1">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-heading text-white mb-1 leading-tight">
                 Tour
               </h2>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-heading bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-tight">
                 Experiences
               </h2>
             </motion.div>
-
-            {/* Orbiting Cards */}
-            {[
-              { name: "Culture", angle: 0, gradient: "from-purple-600 via-fuchsia-600 to-pink-600", border: "border-purple-400" },
-              { name: "History", angle: 60, gradient: "from-yellow-600 via-orange-600 to-red-600", border: "border-yellow-400" },
-              { name: "Adventure", angle: 120, gradient: "from-red-600 via-rose-600 to-pink-600", border: "border-red-400" },
-              { name: "Art & Museums", angle: 180, gradient: "from-indigo-600 via-blue-600 to-cyan-600", border: "border-indigo-400" },
-              { name: "Nature", angle: 240, gradient: "from-green-600 via-emerald-600 to-teal-600", border: "border-green-400" },
-              { name: "Local Life", angle: 300, gradient: "from-sky-600 via-blue-600 to-indigo-600", border: "border-sky-400" }
-            ].map((cat, index) => {
-              // Calculate position on circle
-              const radius = 250; // Distance from center
-              const angleRad = (cat.angle * Math.PI) / 180;
-              const x = Math.cos(angleRad) * radius;
-              const y = Math.sin(angleRad) * radius;
-
-              return (
-                <motion.div
-                  key={cat.name}
-                  className="absolute"
-                  style={{
-                    left: '50%',
-                    top: '50%',
-                    marginLeft: `${x}px`,
-                    marginTop: `${y}px`,
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10
-                  }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ 
-                    duration: 0.6, 
-                    delay: 0.8 + (index * 0.1),
-                    type: "spring",
-                    stiffness: 100
-                  }}
-                  animate={{
-                    y: [0, -15, 0],
-                  }}
-                  transition={{
-                    y: {
-                      duration: 3 + (index * 0.3),
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      ease: "easeInOut"
-                    }
-                  }}
-                >
-                  <motion.div 
-                    whileHover={{ scale: 1.15, rotate: 5 }}
-                    className={`bg-slate-800/80 backdrop-blur-sm w-[140px] md:w-[160px] p-5 rounded-full border-2 ${cat.border} text-center shadow-2xl hover:shadow-3xl transition-all cursor-default group relative overflow-hidden`}
-                  >
-                    <motion.div 
-                      className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-20`}
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    />
-                    
-                    <motion.div 
-                      className={`w-12 h-12 mx-auto bg-gradient-to-br ${cat.gradient} rounded-full flex items-center justify-center text-white mb-3 relative z-10 shadow-lg`}
-                      whileHover={{ rotate: [0, -20, 20, -20, 20, 0] }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <GraduationCap size={24} strokeWidth={2.5} />
-                    </motion.div>
-                    <h3 className="font-bold text-xs md:text-sm text-white relative z-10">{cat.name}</h3>
-                  </motion.div>
-                </motion.div>
-              );
-            })}
           </div>
         </div>
       </section>

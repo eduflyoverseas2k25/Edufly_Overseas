@@ -110,67 +110,86 @@ export default function Programs() {
             </p>
           </motion.div>
 
-          <motion.div 
-            className="grid lg:grid-cols-3 gap-8 mb-12"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {/* Quick Info Cards */}
+          {/* Info Cards - Horizontal Scrolling */}
+          <div className="relative overflow-hidden mb-12">
             <motion.div 
-              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
-              variants={itemVariants}
-              whileHover="hover"
+              className="flex gap-8"
+              animate={{
+                x: [-1200, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "linear",
+              }}
             >
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
-                <Calendar size={24} />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-slate-900">Duration</h3>
-              <p className="text-2xl font-bold text-primary">13 Days</p>
-              <p className="text-sm text-slate-900 mt-1">New York → Niagara → Washington DC → Orlando</p>
-            </motion.div>
+              {/* Duplicate cards for seamless loop */}
+              {[...Array(3)].map((_, setIndex) => (
+                <div key={setIndex} className="flex gap-8 shrink-0">
+                  {/* Duration Card - Blue */}
+                  <motion.div 
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-lg border-2 border-blue-300 hover:shadow-2xl transition-shadow w-[320px] shrink-0"
+                    whileHover={{ scale: 1.05, y: -10 }}
+                  >
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white mb-4">
+                      <Calendar size={24} />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-blue-900">Duration</h3>
+                    <p className="text-2xl font-bold text-blue-700">13 Days</p>
+                    <p className="text-sm text-blue-800 mt-1 font-medium">New York → Niagara → Washington DC → Orlando</p>
+                  </motion.div>
 
-            <motion.div 
-              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
-              variants={itemVariants}
-              whileHover="hover"
-            >
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
-                <Users size={24} />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-slate-900">Eligibility</h3>
-              <p className="text-2xl font-bold text-primary">Grade 6-12</p>
-              <p className="text-sm text-slate-900 mt-1">Students from all schools</p>
-            </motion.div>
+                  {/* Eligibility Card - Green */}
+                  <motion.div 
+                    className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg border-2 border-green-300 hover:shadow-2xl transition-shadow w-[320px] shrink-0"
+                    whileHover={{ scale: 1.05, y: -10 }}
+                  >
+                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white mb-4">
+                      <Users size={24} />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-green-900">Eligibility</h3>
+                    <p className="text-2xl font-bold text-green-700">Grade 6-12</p>
+                    <p className="text-sm text-green-800 mt-1 font-medium">Students from all schools</p>
+                  </motion.div>
 
-            <motion.div 
-              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
-              variants={itemVariants}
-              whileHover="hover"
-            >
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-4">
-                <DollarSign size={24} />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-slate-900">Investment</h3>
-              <p className="text-2xl font-bold text-primary">₹4,10,000</p>
-              <p className="text-sm text-slate-900 mt-1">All-inclusive (Flights, Visa, Hotels, Meals)</p>
+                  {/* Investment Card - Orange */}
+                  <motion.div 
+                    className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-lg border-2 border-orange-300 hover:shadow-2xl transition-shadow w-[320px] shrink-0"
+                    whileHover={{ scale: 1.05, y: -10 }}
+                  >
+                    <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white mb-4">
+                      <DollarSign size={24} />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-orange-900">Investment</h3>
+                    <p className="text-2xl font-bold text-orange-700">₹4,10,000</p>
+                    <p className="text-sm text-orange-800 mt-1 font-medium">All-inclusive (Flights, Visa, Hotels, Meals)</p>
+                  </motion.div>
+                </div>
+              ))}
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Main Content */}
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Left Column */}
             <div className="space-y-8">
               <motion.div 
-                className="bg-white p-8 rounded-2xl shadow-lg border border-border"
+                className="p-8 rounded-2xl shadow-lg border-2"
                 animate={{
                   scale: [1, 1.05, 1],
+                  background: [
+                    "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                    "linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%)",
+                    "linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%)",
+                    "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                  ],
+                  borderColor: ["#fbbf24", "#a78bfa", "#60a5fa", "#fbbf24"],
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 6,
                   repeat: Infinity,
-                  repeatType: "reverse",
+                  repeatType: "loop",
                   ease: "easeInOut"
                 }}
               >
@@ -191,8 +210,8 @@ export default function Programs() {
                     "Cultural & Educational Excursions"
                   ].map((highlight, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-                      <span className="text-slate-900 font-medium">{highlight}</span>
+                      <CheckCircle2 className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
+                      <span className="text-slate-900 font-semibold">{highlight}</span>
                     </li>
                   ))}
                 </ul>
@@ -229,16 +248,17 @@ export default function Programs() {
               <div className="bg-gradient-to-br from-primary to-secondary p-8 rounded-2xl shadow-xl text-white overflow-hidden relative h-[600px]">
                 <h3 className="text-2xl font-bold mb-4">13-Day Itinerary</h3>
                 
-                {/* Scrolling container */}
+                {/* Scrolling container - UPWARD (bottom to top) */}
                 <div className="relative h-[520px] overflow-hidden">
                   <motion.div
                     className="space-y-4"
                     animate={{
-                      y: [0, -1800, 0],
+                      y: [0, -1800],
                     }}
                     transition={{
-                      duration: 30,
+                      duration: 60,  // Slower: 60 seconds instead of 30
                       repeat: Infinity,
+                      repeatType: "loop",
                       ease: "linear",
                     }}
                   >

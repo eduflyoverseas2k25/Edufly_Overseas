@@ -126,9 +126,9 @@ export default function Programs() {
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
                 <Calendar size={24} />
               </div>
-              <h3 className="font-bold text-lg mb-2">Duration</h3>
+              <h3 className="font-bold text-lg mb-2 text-slate-900">Duration</h3>
               <p className="text-2xl font-bold text-primary">13 Days</p>
-              <p className="text-sm text-slate-600 mt-1">New York → Niagara → Washington DC → Orlando</p>
+              <p className="text-sm text-slate-900 mt-1">New York → Niagara → Washington DC → Orlando</p>
             </motion.div>
 
             <motion.div 
@@ -139,9 +139,9 @@ export default function Programs() {
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
                 <Users size={24} />
               </div>
-              <h3 className="font-bold text-lg mb-2">Eligibility</h3>
+              <h3 className="font-bold text-lg mb-2 text-slate-900">Eligibility</h3>
               <p className="text-2xl font-bold text-primary">Grade 6-12</p>
-              <p className="text-sm text-slate-600 mt-1">Students from all schools</p>
+              <p className="text-sm text-slate-900 mt-1">Students from all schools</p>
             </motion.div>
 
             <motion.div 
@@ -152,9 +152,9 @@ export default function Programs() {
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-4">
                 <DollarSign size={24} />
               </div>
-              <h3 className="font-bold text-lg mb-2">Investment</h3>
+              <h3 className="font-bold text-lg mb-2 text-slate-900">Investment</h3>
               <p className="text-2xl font-bold text-primary">₹4,10,000</p>
-              <p className="text-sm text-slate-600 mt-1">All-inclusive (Flights, Visa, Hotels, Meals)</p>
+              <p className="text-sm text-slate-900 mt-1">All-inclusive (Flights, Visa, Hotels, Meals)</p>
             </motion.div>
           </motion.div>
 
@@ -162,8 +162,19 @@ export default function Programs() {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Left Column */}
             <div className="space-y-8">
-              <div className="bg-white p-8 rounded-2xl shadow-lg border border-border">
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <motion.div 
+                className="bg-white p-8 rounded-2xl shadow-lg border border-border"
+                animate={{
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut"
+                }}
+              >
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-900">
                   <Award className="text-primary" size={28} />
                   Programme Highlights
                 </h3>
@@ -181,14 +192,14 @@ export default function Programs() {
                   ].map((highlight, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <CheckCircle2 className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-                      <span className="text-slate-700">{highlight}</span>
+                      <span className="text-slate-900 font-medium">{highlight}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
 
               <div className="bg-white p-8 rounded-2xl shadow-lg border border-border">
-                <h3 className="text-2xl font-bold mb-6">What's Included</h3>
+                <h3 className="text-2xl font-bold mb-6 text-slate-900">What's Included</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
                     "Return International Airfare",
@@ -206,7 +217,7 @@ export default function Programs() {
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="text-primary flex-shrink-0" size={16} />
-                      <span>{item}</span>
+                      <span className="text-slate-900">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -215,32 +226,51 @@ export default function Programs() {
 
             {/* Right Column */}
             <div className="space-y-8">
-              <div className="bg-gradient-to-br from-primary to-secondary p-8 rounded-2xl shadow-xl text-white">
+              <div className="bg-gradient-to-br from-primary to-secondary p-8 rounded-2xl shadow-xl text-white overflow-hidden relative h-[600px]">
                 <h3 className="text-2xl font-bold mb-4">13-Day Itinerary</h3>
-                <div className="space-y-4">
-                  {[
-                    { day: "1-2", title: "Departure & NYC Arrival", desc: "Times Square, City Orientation" },
-                    { day: "3", title: "New York City Tour", desc: "Statue of Liberty, 9/11 Memorial, Intrepid Museum" },
-                    { day: "4", title: "Niagara Falls", desc: "Maid of Mist, Observation Tower, Night Illumination" },
-                    { day: "5", title: "Washington DC", desc: "White House, Capitol, Lincoln Memorial" },
-                    { day: "6", title: "Howard University STEM", desc: "Full-day program, Robotics Labs, Certification" },
-                    { day: "7", title: "Hershey's & Orlando", desc: "Chocolate World, Flight to Orlando" },
-                    { day: "8-9", title: "NASA Kennedy Space Center", desc: "Astronaut Training, Rocket Simulation, Graduation" },
-                    { day: "10-11", title: "Universal Studios", desc: "2-Day Park Access, Islands of Adventure" },
-                    { day: "12-13", title: "Return Journey", desc: "Departure & Arrival in Chennai" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex gap-4 pb-4 border-b border-white/20 last:border-0">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center font-bold">
-                          {item.day}
-                        </div>
+                
+                {/* Scrolling container */}
+                <div className="relative h-[520px] overflow-hidden">
+                  <motion.div
+                    className="space-y-4"
+                    animate={{
+                      y: [0, -1800, 0],
+                    }}
+                    transition={{
+                      duration: 30,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    {/* Duplicate items for seamless loop */}
+                    {[...Array(3)].map((_, setIndex) => (
+                      <div key={setIndex} className="space-y-4">
+                        {[
+                          { day: "1-2", title: "Departure & NYC Arrival", desc: "Times Square, City Orientation" },
+                          { day: "3", title: "New York City Tour", desc: "Statue of Liberty, 9/11 Memorial, Intrepid Museum" },
+                          { day: "4", title: "Niagara Falls", desc: "Maid of Mist, Observation Tower, Night Illumination" },
+                          { day: "5", title: "Washington DC", desc: "White House, Capitol, Lincoln Memorial" },
+                          { day: "6", title: "Howard University STEM", desc: "Full-day program, Robotics Labs, Certification" },
+                          { day: "7", title: "Hershey's & Orlando", desc: "Chocolate World, Flight to Orlando" },
+                          { day: "8-9", title: "NASA Kennedy Space Center", desc: "Astronaut Training, Rocket Simulation, Graduation" },
+                          { day: "10-11", title: "Universal Studios", desc: "2-Day Park Access, Islands of Adventure" },
+                          { day: "12-13", title: "Return Journey", desc: "Departure & Arrival in Chennai" }
+                        ].map((item, idx) => (
+                          <div key={`${setIndex}-${idx}`} className="flex gap-4 pb-4 border-b border-white/20">
+                            <div className="flex-shrink-0">
+                              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center font-bold text-white">
+                                {item.day}
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold mb-1 text-white">{item.title}</h4>
+                              <p className="text-sm text-white/90">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold mb-1">{item.title}</h4>
-                        <p className="text-sm text-white/80">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </motion.div>
                 </div>
               </div>
 

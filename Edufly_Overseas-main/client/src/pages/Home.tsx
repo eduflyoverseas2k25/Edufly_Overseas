@@ -139,7 +139,7 @@ export default function Home() {
               <span className="text-secondary">to Take-off.</span>
             </h1>
             <p className={`text-lg md:text-xl mb-8 max-w-lg leading-relaxed ${
-              isDark ? "text-slate-200" : "text-slate-600"
+              isDark ? "text-white" : "text-white drop-shadow-lg"
             }`}>
               Immersive learning journeys, transforming textbooks into real-world experiences by connecting students with history, culture, and science through hands-on exploration, fostering vital life skills like teamwork, independence, and critical thinking, all while providing unforgettable memories and building global awareness.
             </p>

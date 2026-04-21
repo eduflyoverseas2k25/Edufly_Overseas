@@ -25,7 +25,7 @@ export default function About() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold font-heading mb-6 text-slate-900">
-                Creating Memorable Educational Tours Since 2010
+                Creating Memorable Educational Tours Since 2018
               </h2>
               <div className="space-y-4 text-lg text-slate-600 leading-relaxed">
                 <p>

@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { usePrograms } from "@/hooks/use-resources";
 import { Loader2, BookOpen, Calendar, Users, Clock, MapPin, CheckCircle2, XCircle, DollarSign, Rocket, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function Programs() {
   const { data: programs, isLoading } = usePrograms();
@@ -16,6 +17,34 @@ export default function Programs() {
     window.open('https://customer-assets.emergentagent.com/job_code-audit-50/artifacts/j3nsyhzj_USA%20STEM%20Programme.pdf', '_blank');
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const cardHoverVariants = {
+    hover: {
+      scale: 1.05,
+      y: -10,
+      transition: { duration: 0.3 }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -26,23 +55,49 @@ export default function Programs() {
           <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
         </div>
-        <div className="container-custom text-center relative z-10">
-          <div className="inline-block mb-4 px-4 py-2 bg-primary/20 rounded-full border border-primary/30">
-            <span className="text-primary text-sm font-semibold">Educational Tour Programs</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading mb-6">
+        <motion.div 
+          className="container-custom text-center relative z-10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div 
+            className="inline-block mb-4 px-4 py-2 bg-primary/20 rounded-full border border-primary/30"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <span className="text-primary text-sm font-semibold">Upcoming Events</span>
+          </motion.div>
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
             Explore, Learn & Grow
-          </h1>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          </motion.h1>
+          <motion.p 
+            className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
             Transformative educational experiences designed for students to explore global innovation hubs, engage with cutting-edge technology, and develop future-ready skills.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </section>
 
       {/* Upcoming Programme - USA STEM */}
       <section className="section-padding bg-slate-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="inline-block mb-4 px-4 py-2 bg-orange-100 rounded-full">
               <span className="text-orange-700 text-sm font-semibold flex items-center gap-2">
                 <Rocket size={16} />
@@ -50,40 +105,58 @@ export default function Programs() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">USA STEM Educational Tour</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-slate-700 max-w-2xl mx-auto">
               13-Day Global Science Research Programme at USA
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          <motion.div 
+            className="grid lg:grid-cols-3 gap-8 mb-12"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             {/* Quick Info Cards */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-border">
+            <motion.div 
+              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
+              variants={itemVariants}
+              whileHover="hover"
+            >
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
                 <Calendar size={24} />
               </div>
               <h3 className="font-bold text-lg mb-2">Duration</h3>
               <p className="text-2xl font-bold text-primary">13 Days</p>
-              <p className="text-sm text-muted-foreground mt-1">New York → Niagara → Washington DC → Orlando</p>
-            </div>
+              <p className="text-sm text-slate-600 mt-1">New York → Niagara → Washington DC → Orlando</p>
+            </motion.div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-border">
+            <motion.div 
+              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
+              variants={itemVariants}
+              whileHover="hover"
+            >
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
                 <Users size={24} />
               </div>
               <h3 className="font-bold text-lg mb-2">Eligibility</h3>
               <p className="text-2xl font-bold text-primary">Grade 6-12</p>
-              <p className="text-sm text-muted-foreground mt-1">Students from all schools</p>
-            </div>
+              <p className="text-sm text-slate-600 mt-1">Students from all schools</p>
+            </motion.div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-border">
+            <motion.div 
+              className="bg-white p-6 rounded-xl shadow-lg border border-border hover:shadow-2xl transition-shadow"
+              variants={itemVariants}
+              whileHover="hover"
+            >
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-4">
                 <DollarSign size={24} />
               </div>
               <h3 className="font-bold text-lg mb-2">Investment</h3>
               <p className="text-2xl font-bold text-primary">₹4,10,000</p>
-              <p className="text-sm text-muted-foreground mt-1">All-inclusive (Flights, Visa, Hotels, Meals)</p>
-            </div>
-          </div>
+              <p className="text-sm text-slate-600 mt-1">All-inclusive (Flights, Visa, Hotels, Meals)</p>
+            </motion.div>
+          </motion.div>
 
           {/* Main Content */}
           <div className="grid lg:grid-cols-2 gap-12">
@@ -219,38 +292,55 @@ export default function Programs() {
       {/* Other Programs Section */}
       <section className="section-padding bg-white">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Other Programs</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Other Events</h2>
+            <p className="text-lg text-slate-700 max-w-2xl mx-auto">
               Explore our additional educational tour packages
             </p>
-          </div>
+          </motion.div>
 
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               {programs?.map((program) => (
-                <div key={program.id} className="bg-white p-8 rounded-2xl shadow-lg border border-border/50 hover:border-primary/50 transition-all group hover:shadow-xl">
+                <motion.div 
+                  key={program.id} 
+                  className="bg-white p-8 rounded-2xl shadow-lg border border-border/50 hover:border-primary/50 transition-all group hover:shadow-2xl"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                >
                   <div className="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
                     <BookOpen size={28} />
                   </div>
                   <h3 className="text-xl font-bold font-heading mb-2 text-primary">{program.category}</h3>
                   <h4 className="text-lg font-semibold mb-4 text-slate-900">{program.title}</h4>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-slate-700 leading-relaxed">
                     {program.description || "Carefully curated tour experiences with cultural immersion and educational activities."}
                   </p>
-                </div>
+                </motion.div>
               ))}
               
               {programs?.length === 0 && (
                 <div className="col-span-full text-center py-20">
-                  <p className="text-lg text-muted-foreground">No other programs available at the moment.</p>
+                  <p className="text-lg text-slate-600">No other events available at the moment.</p>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
